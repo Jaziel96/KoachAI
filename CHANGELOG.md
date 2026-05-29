@@ -37,9 +37,12 @@
 - .gitignore para Python + Next.js (protege .env de commits accidentales)
 
 **Archivos creados:**
+- `backend/app/__init__.py` — hace de `app` un paquete Python importable
+- `backend/app/core/__init__.py` — hace de `app.core` un paquete Python importable
 - `backend/app/main.py` — FastAPI app con endpoint /health
 - `backend/app/core/config.py` — Settings con pydantic-settings
-- `backend/requirements.txt` — dependencias: fastapi, uvicorn, python-dotenv, pydantic-settings, anthropic, supabase
+- `backend/requirements.txt` — dependencias de producción: fastapi, uvicorn, python-dotenv, pydantic-settings, anthropic, supabase
+- `backend/requirements-dev.txt` — dependencias de testing: pytest, httpx, pytest-asyncio
 - `backend/.env.example` — plantilla de variables de entorno
 - `docs/specs/.gitkeep` — carpeta de specs versionada
 - `.gitignore` — exclusiones Python + Node + OS
@@ -51,7 +54,7 @@
 - Ninguno (US de scaffolding sin lógica de negocio)
 
 **Deuda técnica registrada:**
-- `backend/app/__init__.py` no creado — necesario para imports en proyectos más grandes; agregar en US-001 si se requiere
+- Ninguna
 
 ---
 
