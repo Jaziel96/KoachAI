@@ -1,5 +1,13 @@
 # US-001 — Webhook WhatsApp: recibir y verificar mensajes
 
+---
+## Estado: ✅ COMPLETADA
+**Fecha de implementación:** 29 Mayo 2026
+**Commit:** 6172822 (feat(US-001): implement WhatsApp webhook verification and message reception)
+**Archivos principales:** `backend/app/api/endpoints/webhook.py`, `backend/app/schemas/whatsapp.py`, `backend/tests/test_webhook.py`
+**Notas finales:** Se implementó `Query(alias="hub.mode")` para soportar parámetros con punto en FastAPI de forma robusta. Claude también agregó los archivos `__init__.py` resolviendo la deuda técnica de US-000.
+---
+
 ## Contexto
 Toda la comunicación de Koach llega a través de un webhook que
 Meta (WhatsApp Cloud API) llama cada vez que un usuario envía un

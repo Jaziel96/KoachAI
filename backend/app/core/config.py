@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     supabase_key: str = ""
     whatsapp_token: str = ""
     whatsapp_verify_token: str
+    whatsapp_phone_number_id: str
 
 
 settings = Settings()

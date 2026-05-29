@@ -9,7 +9,7 @@
 | Métrica | Valor |
 |---------|-------|
 | **Fase actual** | Setup — Semana 1 |
-| **US completadas** | 2 / 8 (MVP) |
+| **US completadas** | 3 / 8 (MVP) |
 | **Última actualización** | 2026-05-29 |
 | **Deploy backend** | ⏳ Pendiente |
 | **Deploy frontend** | ⏳ Pendiente |
@@ -24,6 +24,46 @@
 ---
 
 ## US completadas
+
+## US-002 — Detección de usuario y onboarding conversacional | 2026-05-29
+
+**Qué se implementó:**
+- `handle_message` implementado: detecta usuario existente (→ saludo) o nuevo (→ onboarding)
+- Máquina de estados de 7 pasos con persistencia en `onboarding_estado` (Supabase)
+- Consentimiento LFPDPPP antes de cualquier pregunta de datos personales
+- Validación por paso: edad mínima 13 años (CE-02), peso fuera de rango con confirmación (CE-03)
+- FA-04: máximo 3 intentos por paso antes de sugerir "reiniciar"
+- Comando "reiniciar" disponible en cualquier momento del flujo
+- Creación de registros en `usuarios`, `perfiles` y `consentimientos` al completar
+- Envío de mensajes vía `whatsapp_sender.send_message()` con httpx.AsyncClient
+- BackgroundTasks de FastAPI: `handle_message` es async para no bloquear el endpoint
+- Todos los mensajes centralizados en `es_mx.py` (CA-09)
+
+**Archivos creados:**
+- `backend/scripts/init_db_us002.sql` — DDL de las 4 tablas (referencia y reproducibilidad)
+- `backend/app/db/__init__.py` — paquete db
+- `backend/app/db/supabase.py` — singleton del cliente Supabase
+- `backend/app/messages/__init__.py` — paquete messages
+- `backend/app/messages/es_mx.py` — todos los mensajes del bot en español mexicano
+- `backend/app/services/whatsapp_sender.py` — send_message() con httpx.AsyncClient
+- `backend/app/services/onboarding.py` — máquina de estados + validación + helpers de DB
+- `backend/tests/pytest.ini` — asyncio_mode = auto para tests async sin decoradores
+- `backend/tests/test_onboarding.py` — 21 tests (CA-01→CA-08 + unidades de validación)
+
+**Archivos modificados:**
+- `backend/app/core/config.py` — agregado `whatsapp_phone_number_id: str` (requerido)
+- `backend/.env.example` — agregado `WHATSAPP_PHONE_NUMBER_ID`
+- `backend/requirements.txt` — agregado `httpx==0.28.1`
+- `backend/app/services/whatsapp.py` — implementado `handle_message` (de stub a async funcional)
+- `backend/tests/conftest.py` — agregada variable de entorno `WHATSAPP_PHONE_NUMBER_ID`
+
+**Tests agregados:**
+- `backend/tests/test_onboarding.py` — 21 tests que cubren CA-01 a CA-08, CE-02, FA-04 y unidades de `_validate_answer`
+
+**Deuda técnica registrada:**
+- El disparo de US-003 al completar onboarding es solo un `logger.info` por ahora — pendiente conectar en US-003
+
+---
 
 ## US-001 — Webhook WhatsApp: recibir y verificar mensajes | 2026-05-29
 
