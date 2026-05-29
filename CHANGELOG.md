@@ -9,7 +9,7 @@
 | Métrica | Valor |
 |---------|-------|
 | **Fase actual** | Setup — Semana 1 |
-| **US completadas** | 3 / 8 (MVP) |
+| **US completadas** | 4 / 8 (MVP) |
 | **Última actualización** | 2026-05-29 |
 | **Deploy backend** | ⏳ Pendiente |
 | **Deploy frontend** | ⏳ Pendiente |
@@ -24,6 +24,41 @@
 ---
 
 ## US completadas
+
+## US-003 — Generación del plan inicial con Claude API | 2026-05-29
+
+**Qué se implementó:**
+- Orquestador `generar_plan_inicial(phone_number)` que conecta onboarding → Claude → WhatsApp
+- Fórmulas Mifflin-St Jeor para TMB/TDEE (diferenciado por género; "prefiero no decir" = promedio)
+- Factor sedentario 1.2 y ajustes de meta calórica (-300 bajar peso, +250 ganar músculo)
+- Prompt estructurado en `app/prompts/plan_inicial.py` con 4 secciones (perfil, alimentación, ejercicio, consejos)
+- Wrapper async para SDK Anthropic con `asyncio.to_thread` + reintento automático tras 2s (FA-01/FA-02)
+- Chunker inteligente `_chunk_message()`: corta en `\n\n` hacia atrás, máximo 1500 chars
+- Pausa de 1s entre chunks para no saturar la Graph API de Meta
+- Plan guardado en tabla `planes` con TMB, TDEE, meta calórica y tiempo de generación
+- CE-03: fallo al guardar en DB se loggea pero el plan se envía igualmente
+- `_complete_onboarding` en US-002 actualizado: reemplaza logger.info con llamada real a `generar_plan_inicial`
+
+**Archivos creados:**
+- `backend/scripts/init_db_us003.sql` — DDL de tabla planes
+- `backend/app/prompts/__init__.py` — paquete prompts
+- `backend/app/prompts/plan_inicial.py` — función construir_prompt()
+- `backend/app/services/claude.py` — generate_plan() con asyncio.to_thread + retry
+- `backend/app/services/plan.py` — orquestador generar_plan_inicial + cálculos + chunker
+- `backend/tests/test_plan.py` — 16 tests (cálculos, chunker, flujo completo, fallos)
+
+**Archivos modificados:**
+- `backend/app/messages/es_mx.py` — agregadas constantes GENERANDO_PLAN y ERROR_GENERANDO_PLAN
+- `backend/app/services/onboarding.py` — _complete_onboarding ahora llama generar_plan_inicial (late import)
+- `backend/tests/test_onboarding.py` — test de completion actualizado para GENERANDO_PLAN
+
+**Tests agregados:**
+- `backend/tests/test_plan.py` — 16 tests: TMB/TDEE (CA-02), chunker (CA-08), flujo completo, fallo Claude (CA-07), CE-01, CE-03, _recuperar_perfil, _guardar_plan
+
+**Deuda técnica registrada:**
+- Ninguna
+
+---
 
 ## US-002 — Detección de usuario y onboarding conversacional | 2026-05-29
 

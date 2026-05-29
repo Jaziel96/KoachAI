@@ -10,7 +10,9 @@
       "Bash(py -3.12 -m pytest tests/test_webhook.py -v)",
       "Bash(py -3.12 -m pytest tests/test_onboarding.py -v)",
       "Bash(py -3.12 -m pip install --quiet supabase==2.10.0)",
-      "Bash(py -3.12 -m pytest tests/ -v)"
+      "Bash(py -3.12 -m pytest tests/ -v)",
+      "Bash(py -3.12 -m pip install --quiet anthropic==0.40.0)",
+      "Bash(py -3.12 -m pytest tests/ -q)"
     ]
   }
 }

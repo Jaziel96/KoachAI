@@ -11,6 +11,7 @@ from app.messages.es_mx import (
     CONSENTIMIENTO_RECHAZADO,
     DEMASIADOS_INTENTOS,
     ERROR_EDAD_MINIMA,
+    GENERANDO_PLAN,
     PREGUNTAS,
     RESPUESTA_INVALIDA,
 )
@@ -123,7 +124,7 @@ async def test_all_7_steps_completed_calls_complete():
         assert call_datos["nombre"] == "Juan"
 
 
-async def test_complete_onboarding_sends_confirmation_message():
+async def test_complete_onboarding_sends_generando_plan_and_calls_generar():
     datos = {
         "consintio": True, "nombre": "María", "edad": 30, "peso_kg": 60.0,
         "talla_cm": 165, "genero": "mujer", "meta": "comer mejor", "alergias": "lactosa",
@@ -136,10 +137,11 @@ async def test_complete_onboarding_sends_confirmation_message():
         patch("app.services.onboarding.get_client"),
         patch("app.services.onboarding._delete_state", new_callable=AsyncMock),
         patch("app.services.onboarding.send_message", new_callable=AsyncMock) as mock_send,
+        patch("app.services.plan.generar_plan_inicial", new_callable=AsyncMock) as mock_generar,
     ):
         await _complete_onboarding(PHONE, datos)
-        mock_send.assert_called_once()
-        assert "María" in mock_send.call_args[0][1]
+        mock_send.assert_called_once_with(PHONE, GENERANDO_PLAN)
+        mock_generar.assert_called_once_with(PHONE)
 
 
 # ---------------------------------------------------------------------------

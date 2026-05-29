@@ -1,5 +1,13 @@
 # US-002 — Detección de usuario y onboarding conversacional
 
+---
+## Estado: ✅ COMPLETADA
+**Fecha de implementación:** 29 Mayo 2026
+**Commit:** 3831005 (feat(US-002): implement user detection and conversational onboarding)
+**Archivos principales:** `backend/app/services/onboarding.py`, `backend/app/messages/es_mx.py`, `backend/app/services/whatsapp_sender.py`
+**Notas finales:** Se validó que el uso de `asyncio.to_thread` es la práctica oficial y recomendada para encapsular llamadas síncronas de `supabase-py` v2 en un contexto asíncrono, garantizando el rendimiento de la aplicación.
+---
+
 ## Contexto
 Cuando llega un mensaje al webhook (US-001), el sistema necesita
 saber quién está escribiendo y qué hacer con ese mensaje. Si el

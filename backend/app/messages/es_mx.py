@@ -63,6 +63,16 @@ ERROR_EDAD_MINIMA = (
     "¡Cuídate mucho!"
 )
 
+GENERANDO_PLAN = (
+    "⏳ ¡Perfecto! Estoy analizando tu perfil y generando tu plan personalizado. "
+    "Esto toma unos segundos..."
+)
+
+ERROR_GENERANDO_PLAN = (
+    "Tuve un problema generando tu plan. "
+    "No te preocupes, lo intentaré de nuevo en unos minutos 🔄"
+)
+
 
 def confirmacion_peso(peso: float) -> str:
     return f"¿Estás seguro de que pesas *{peso} kg*? Responde *sí* para confirmar o *no* para corregir."

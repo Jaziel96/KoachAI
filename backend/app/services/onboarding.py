@@ -9,10 +9,10 @@ from app.messages.es_mx import (
     CONSENTIMIENTO_RECHAZADO,
     DEMASIADOS_INTENTOS,
     ERROR_EDAD_MINIMA,
+    GENERANDO_PLAN,
     PREGUNTAS,
     RESPUESTA_INVALIDA,
     confirmacion_peso,
-    onboarding_completo,
 )
 from app.services.whatsapp_sender import send_message
 
@@ -177,8 +177,11 @@ async def _complete_onboarding(phone_number: str, datos: dict) -> None:
     )
 
     await _delete_state(phone_number)
-    await send_message(phone_number, onboarding_completo(datos["nombre"]))
-    logger.info(f"Onboarding completado para {phone_number} (usuario_id={usuario_id}) — pendiente US-003")
+    await send_message(phone_number, GENERANDO_PLAN)
+    logger.info(f"Onboarding completado para {phone_number} (usuario_id={usuario_id}) — disparando US-003")
+
+    from app.services.plan import generar_plan_inicial
+    await generar_plan_inicial(phone_number)
 
 
 # ---------------------------------------------------------------------------
