@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     WHATSAPP_PHONE_NUMBER_ID: str
     WHATSAPP_VERIFY_TOKEN: SecretStr
 
+    # HTTP
+    CORS_ALLOWED_ORIGINS: list[str] = []
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
