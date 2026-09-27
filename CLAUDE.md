@@ -9,11 +9,26 @@ y User Stories completas) y `docs/plan-desarrollo-secuencial.md` (orden de ejecu
 hitos M1-M12, con horas y pruebas de uso) antes de implementar cualquier cosa.
 
 Documentos de referencia en `docs/`:
+- `plan-maestro.md` — **documento base del producto completo**: visión, misión, los 35
+  módulos de producto, y la **sección 14: el esquema de base de datos completo (30+
+  tablas ya diseñadas)**. Trae una nota de vigencia al inicio que indica qué partes están
+  corregidas por documentos más recientes. **Si vas a diseñar o modificar una tabla,
+  consulta primero la sección 14 de este documento — no inventes un esquema nuevo desde
+  fragmentos de otros docs.** Si vas a tomar una decisión de producto que no esté clara
+  en los otros documentos, revisa aquí la visión y esencia del producto (secciones 1-10)
+  antes de asumir algo.
 - `plan-desarrollo-sdd.md` — arquitectura técnica, ADRs, estructura del proyecto, User Stories detalladas (US-000 en adelante)
 - `plan-desarrollo-secuencial.md` — el orden real de ejecución (hitos M1-M12), con horas estimadas y una prueba de uso concreta al cierre de cada hito. **Sigue este orden**, no actives épicas fuera de secuencia.
 - `analisis-brechas.md` — especifica EP-31 (US-134 a US-144): circuit breaker de costos, prompt injection, detección de TCA, protocolo de derivación, rate limiting, panel admin, ARCO, retención de datos
 - `ciclo-vida-usuario.md` — especifica US-153 a US-157: estados de cuenta, activación de pago, verificación de identidad
 - `adenda-legal-pendientes.md` — marco NOM-043 y lenguaje obligatorio del producto
+
+**Regla de jerarquía entre documentos:** cuando `plan-maestro.md` contradice a cualquier
+otro documento en `docs/`, gana el otro documento (más reciente) — pero eso no significa
+ignorar `plan-maestro.md`: úsalo para todo lo que los demás documentos no cubren en
+detalle (el esquema completo de datos, la visión de producto, los 10 módulos originales).
+La nota de vigencia al inicio de `plan-maestro.md` lista exactamente qué partes están
+superadas.
 
 ## Reglas técnicas NO NEGOCIABLES
 
@@ -61,14 +76,23 @@ Documentos de referencia en `docs/`:
     "tratamiento", "diagnóstico", "nutriólogo virtual". Usar "orientación alimentaria",
     "guía de alimentación", "acompañamiento", "coach de hábitos saludables".
 
+13. **Antes de diseñar cualquier tabla, endpoint o regla de producto "desde cero" porque
+    parece que falta en el repo**: primero busca en `docs/plan-maestro.md` (visión
+    completa + esquema de datos sección 14) y en el resto de `docs/`. Si después de
+    revisarlos de verdad sigue sin estar definido, dilo explícitamente y pregunta antes
+    de inventar una solución — no asumas que porque no está en `plan-desarrollo-sdd.md`
+    no existe en ningún lado.
+
 ## Antes de implementar cualquier User Story
 
 1. Lee la spec completa en `docs/plan-desarrollo-sdd.md` (o en `docs/analisis-brechas.md` /
    `docs/ciclo-vida-usuario.md` si la US pertenece a EP-31 o al ciclo de vida)
-2. Verifica en `docs/plan-desarrollo-secuencial.md` en qué hito (M1-M12) cae, y confirma que
+2. Si la US involucra modelo de datos o una decisión de producto no trivial, revisa también
+   `docs/plan-maestro.md` (visión completa y esquema de datos sección 14) antes de proponer algo
+3. Verifica en `docs/plan-desarrollo-secuencial.md` en qué hito (M1-M12) cae, y confirma que
    los hitos previos ya están cerrados (no saltar de orden — hay dependencias reales)
-3. Verifica dependencias con otras US listadas en la spec
-4. Propón un plan de implementación antes de escribir código, y espera aprobación
+4. Verifica dependencias con otras US listadas en la spec
+5. Propón un plan de implementación antes de escribir código, y espera aprobación
 
 ## Comandos frecuentes
 

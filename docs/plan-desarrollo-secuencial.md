@@ -1,6 +1,6 @@
 # KOACH — Plan de Desarrollo Secuencial
 ### Orden de ejecución por hitos, sin calendario — basado en horas
-> Complemento al Plan SDD — Versión 1.1, Septiembre 2026 (agrega hito M9 bis por la arquitectura agéntica de ADR-007)
+> Complemento al Plan SDD — Versión 1.2, Septiembre 2026 (v1.1 agrega hito M9 bis; v1.2 agrega el eval harness y "propone→confirma" a M9 bis, y extiende M10 para que la proactividad use el loop agéntico)
 > Úsese junto con `koach-plan-desarrollo-sdd.md` (specs completas de cada US)
 
 ---
@@ -127,23 +127,23 @@ Antes de seguir: registrar comidas reales propias durante varios días en lengua
 ---
 
 ### M9 bis — Núcleo agéntico (ADR-007)
-**US-159 (catálogo de herramientas), US-160 (bucle agéntico principal)**
-**≈ 10 horas**
+**US-159 (catálogo de herramientas), US-160 (bucle agéntico principal), US-161 (eval harness de tool-calling)**
+**≈ 15 horas** (↑ desde 10 — agrega el mecanismo genérico "propone→confirma" y el eval harness)
 
-Por qué aquí y no en M2: estas dos US envuelven funciones de dominio que todavía no existen hasta cerrar M9 (`registrar_comida`, `registrar_ejercicio`, `registrar_agua`, `registrar_peso` como funciones reales, no solo interfaces). Por qué antes de M10: el motor de proactividad de M10 también necesita poder ajustar horario/modo silencio, y esas son tools del mismo catálogo — más simple si el loop agéntico ya existe cuando se llega ahí.
+Por qué aquí y no en M2: estas US envuelven funciones de dominio que todavía no existen hasta cerrar M9 (`registrar_comida`, `registrar_ejercicio`, `registrar_agua`, `registrar_peso` como funciones reales, no solo interfaces). Por qué antes de M10: el motor de proactividad de M10 ahora también pasa por este mismo loop (ver nota de M10 abajo) — tiene que existir primero.
 
-Qué se construye: el catálogo formal de tools de Fase 1 (`registrar_comida`, `registrar_ejercicio`, `registrar_agua`, `registrar_peso`, `ajustar_horario_mensajes`, `activar_modo_silencio`, `derivar_a_profesional`, `marcar_crisis`, más los placeholders de Fase 2), y el loop que orquesta: mensaje → Claude decide tools → se ejecutan → Claude redacta respuesta final.
+Qué se construye: el catálogo formal de tools de Fase 1 (`registrar_comida`, `registrar_ejercicio`, `registrar_agua`, `registrar_peso`, `ajustar_horario_mensajes`, `activar_modo_silencio`, `derivar_a_profesional`, `marcar_crisis`, `confirmar_accion_pendiente`, `pedir_aclaracion`, más los placeholders de Fase 2 `actualizar_preferencia_alimentaria` y `buscar_contexto_historico`), el loop que orquesta (mensaje → Claude decide tools → se ejecutan → Claude redacta respuesta final), el mecanismo genérico de confirmación para tools de efecto grande, y el conjunto inicial de "conversaciones doradas" que valida en CI que el modelo elige bien las tools.
 
 **🎯 PRUEBA DE USO REAL — el momento en que Koach se vuelve agente de verdad.**
-Mandar un mensaje que mezcle dos intenciones en una sola frase (p. ej. "ya comí unos tacos y ya no me mandes mensajes en la tarde") y confirmar que ambas tools se invocan en el mismo turno y la respuesta final confirma las dos acciones. Confirmar también que una tool que falla a propósito (desconectar la DB momentáneamente) no rompe el turno — el usuario recibe una respuesta honesta, no un error crudo. Revisar `tool_calls_log` y confirmar que cada invocación quedó registrada con sus argumentos.
+Mandar un mensaje que mezcle dos intenciones en una sola frase (p. ej. "ya comí unos tacos y ya no me mandes mensajes en la tarde") y confirmar que ambas tools se invocan en el mismo turno y la respuesta final confirma las dos acciones. Probar también una tool `requiere_confirmacion` (p. ej. `ajustar_horario_mensajes` con un cambio grande) y confirmar que NO se aplica hasta que el usuario confirme explícitamente en el turno siguiente. Confirmar que una tool que falla a propósito (desconectar la DB momentáneamente) no rompe el turno — el usuario recibe una respuesta honesta, no un error crudo. Revisar `tool_calls_log` y confirmar que cada invocación quedó registrada con sus argumentos. Correr el eval harness (US-161) y confirmar que el set inicial de casos pasa.
 
 ---
 
 ### M10 — Motor de proactividad
-**US-037, US-038, US-039, US-040, US-041**
-**≈ 14 horas**
+**US-037, US-038 (ahora genera contenido vía el loop agéntico de M9 bis), US-039, US-040, US-041**
+**≈ 16 horas** (↑ desde 14 — US-038 ya no dispara un template fijo, construye su propio request con tools y usa el mismo loop de M9 bis)
 
-**✅ Prueba de uso:** configurar horarios de prueba cortos (cada 5-10 minutos en vez de horarios reales de todo el día) y confirmar que los mensajes llegan en la ventana correcta, respetando modo silencio y el filtro de estado de M6.
+**✅ Prueba de uso:** configurar horarios de prueba cortos (cada 5-10 minutos en vez de horarios reales de todo el día) y confirmar que los mensajes llegan en la ventana correcta, respetando modo silencio y el filtro de estado de M6. Adicionalmente: confirmar que un check-in con alacena disponible sugiere algo coherente (usa `consultar_alacena`/`sugerir_comida`), y que apagar la API de Claude a propósito no deja al usuario sin mensaje — cae al template de respaldo (RF-7 de US-038).
 
 ---
 
@@ -184,13 +184,13 @@ Con M1 a M12 completos, el producto está listo para su primera prueba con perso
 | M7 — Onboarding | 20 |
 | M8 — Generación de planes | 14 |
 | M9 — Registro + protocolos de salud | 23 |
-| M9 bis — Núcleo agéntico (ADR-007) | 10 |
-| M10 — Proactividad | 14 |
+| M9 bis — Núcleo agéntico (ADR-007) | 15 |
+| M10 — Proactividad | 16 |
 | M11 — Rachas | 7 |
 | M12 — Cumplimiento y panel | 18 |
-| **TOTAL** | **≈ 165 horas** |
+| **TOTAL** | **≈ 172 horas** |
 
-**Nota honesta:** la versión original del plan estimaba ~110 horas para este mismo alcance (Fase 0 + Fase 1). Las primeras ~44 horas adicionales fueron el resultado de las revisiones de brechas, seguridad y ciclo de vida (circuit breaker, detección de TCA, ciclo de vida de cuentas, cumplimiento ARCO). Las ~11 horas más recientes (M2 +2, M9 -1, M9 bis +10) son el costo de rediseñar el núcleo del agente con tool-use nativo (ADR-007) en vez de un clasificador de intención rígido — no es que el plan se haya vuelto ineficiente, es una inversión directa en que Koach responda como agente real desde el MVP. Vale la inversión.
+**Nota honesta:** la versión original del plan estimaba ~110 horas para este mismo alcance (Fase 0 + Fase 1). Las primeras ~44 horas adicionales fueron el resultado de las revisiones de brechas, seguridad y ciclo de vida (circuit breaker, detección de TCA, ciclo de vida de cuentas, cumplimiento ARCO). Otras ~11 horas (M2 +2, M9 -1, M9 bis +10) fueron el costo inicial de rediseñar el núcleo del agente con tool-use nativo (ADR-007). Las ~7 horas más recientes (M9 bis +5, M10 +2) agregan el mecanismo genérico "propone→confirma", el eval harness de tool-calling (US-161), y que la proactividad misma pase por el loop agéntico en vez de templates fijos — no es que el plan se haya vuelto ineficiente, es que cada revisión encuentra algo que de verdad conviene resolver ahora y no después. Vale la inversión.
 
 ---
 
@@ -222,5 +222,5 @@ Como no hay calendario fijo, esta es la guía de qué priorizar si solo tienes u
 
 ---
 
-*Plan de Desarrollo Secuencial — Koach v1.1*
+*Plan de Desarrollo Secuencial — Koach v1.2*
 *Septiembre 2026*

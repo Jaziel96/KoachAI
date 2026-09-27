@@ -211,7 +211,7 @@ Revisión mensual de Fitia, Zapia, Google Health.
 | 6.4 | Riesgo cambiario USD/MXN | 🟡 | Mes 3 | No |
 | 6.5 | QA conversacional y red-teaming | 🔴 | Antes del primer beta — integrado en M9 | Gate de calidad interno |
 | 6.6 | Moderación de contenido / abuso hacia Koach | 🟠 | Semana 3, con el system prompt | No |
-| 6.7 | Rollback de prompts | 🟡 | Semana 2-3, con Git/CI | No |
+| 6.7 | Rollback de prompts | 🟡 | Semana 2-3, con Git/CI — mordida real desde M9 bis vía **US-161** (eval harness de tool-calling) | No |
 | 6.8 | Post-mortems de incidentes | 🟡 | Mes 2+ | No |
 
 ---
@@ -267,5 +267,5 @@ US-134 Circuit breaker de costos de IA (🔴, 3h) · US-135 Defensas prompt inje
 
 ---
 
-*Koach — Análisis de Brechas v1.1 (integra Parte 6, Parte 7, y notas de ADR-007)*
+*Koach — Análisis de Brechas v1.2 (integra Parte 6, Parte 7, notas de ADR-007 y referencia a US-161)*
 *Septiembre 2026*

@@ -1,7 +1,7 @@
 # KOACH — Plan de Desarrollo SDD
 ### Especificaciones, User Stories y Arquitectura Técnica
 > Documento de ejecución técnica para desarrollo con Claude Code
-> Versión 1.1 — Septiembre 2026 (agrega ADR-007: arquitectura agéntica con tool-use nativo, extiende US-006/US-009, reduce alcance de US-031, agrega US-159 y US-160)
+> Versión 1.2 — Septiembre 2026 (v1.1 agrega ADR-007, extiende US-006/US-009, reduce alcance de US-031, agrega US-159/US-160. v1.2 agrega: patrón "propone→confirma" genérico, proactividad vía el mismo loop agéntico — US-038 extendida, eval harness de tool-calling — US-161 nueva, y 3 tools nuevas en el catálogo)
 
 ---
 
@@ -224,6 +224,8 @@ app/ai/prompts/
 - **Los límites de seguridad viven en las funciones, no en el prompt.** Un prompt puede ignorarse (prompt injection, alucinación); una validación en `app/domain/` no.
 - **Crisis y derivación profesional nunca son "una tool más".** `marcar_crisis` y `derivar_a_profesional` se pueden invocar desde el loop agéntico, pero la detección de crisis (US-032) sigue corriendo como guard previo e independiente — si detecta crisis, el loop agéntico ni se ejecuta ese turno.
 - **Toda tool call se registra** en `historial_conversacion` (qué tool, qué argumentos, qué resultado) para auditoría — es un requisito de las brechas de seguridad ya identificadas (prompt injection, ver `koach-analisis-brechas.md` sección 2.2).
+- **Patrón "propone → confirma" generalizado para tools de efecto grande.** No es exclusivo de `registrar_peso`. Cualquier tool marcada `requiere_confirmacion=True` en el catálogo de US-159 (ver tabla actualizada) NO aplica su efecto en la misma invocación: retorna un `ToolResult` con una propuesta legible ("vas a ajustar tus mensajes proactivos a partir de las 6pm, ¿confirmas?") y el cambio real solo se aplica cuando el usuario confirma en el turno siguiente, vía la tool genérica `confirmar_accion_pendiente` (ver US-159 extendida). Esto evita que una alucinación del modelo aplique un cambio importante sin que el usuario lo haya visto explícitamente — es la generalización del mecanismo que ya usaba `registrar_peso` de forma ad-hoc.
+- **La proactividad también pasa por el loop agéntico, no solo el mensaje entrante.** El motor de proactividad (US-038) no debe seguir siendo "el scheduler dispara un template fijo" — debe construir su propio `CompletionRequest` con las tools relevantes (p. ej. `consultar_alacena`, `sugerir_comida`) y dejar que Claude decida el contenido del mensaje saliente, igual que con un mensaje entrante. Esto unifica el codepath: solo hay UN loop agéntico en todo el sistema, ya sea que lo dispare un mensaje del usuario o un job de Celery. Ver extensión de US-038 más abajo.
 
 **Consecuencias:**
 - ✅ Un mensaje puede resolver varias intenciones en un solo turno, de forma natural
@@ -870,8 +872,8 @@ Una US está DONE cuando:
 | EP-04 | Onboarding conversacional | 6 | 16 |
 | EP-05 | Generación de planes | 5 | 14 |
 | EP-06 | Registro de actividad | 6 | 15 (↓ US-031 reducida) |
-| EP-06 bis | Núcleo agéntico (ADR-007) | 2 (US-159, US-160) | 10 |
-| EP-07 | Motor de proactividad | 5 | 14 |
+| EP-06 bis | Núcleo agéntico (ADR-007) | 3 (US-159, US-160, US-161) | 15 (↑ eval harness + confirmación genérica) |
+| EP-07 | Motor de proactividad | 5 | 16 (↑ US-038 ahora genera contenido vía loop agéntico) |
 | EP-08 | Rachas y resúmenes | 3 | 8 |
 
 ### FASE 2 — Nutrición completa (Semanas 9-16, ~80 hrs)
@@ -2298,7 +2300,7 @@ ON alimentos_mexicanos USING gin (nombre gin_trgm_ops);
 
 ### US-159: Definición de herramientas (tools) del agente
 
-**Estimación:** 5 hrs | **Prioridad:** Crítica
+**Estimación:** 6 hrs (↑ desde 5 hrs — agrega el mecanismo genérico de confirmación y 2 tools nuevas) | **Prioridad:** Crítica
 
 **Como** desarrollador
 **Quiero** un catálogo formal de herramientas que Claude puede invocar, cada una envolviendo una función de dominio/servicio existente
@@ -2314,17 +2316,22 @@ ON alimentos_mexicanos USING gin (nombre gin_trgm_ops);
 | `registrar_comida` | Registra un alimento o comida que el usuario reporta haber consumido | `meal_service.register_meal()` (US-033) | Escritura |
 | `registrar_ejercicio` | Registra una sesión de ejercicio reportada por el usuario | `workout_service.register_workout()` (US-035) | Escritura |
 | `registrar_agua` | Suma vasos/litros de agua al contador del día | `hydration_service.add_water()` (US-036) | Escritura |
-| `registrar_peso` | Registra el peso corporal reportado, con validación de cambios extremos | `progress_service.register_weight()` (US-036) | Escritura sensible |
+| `registrar_peso` | Registra el peso corporal reportado, con validación de cambios extremos | `progress_service.register_weight()` (US-036) | Escritura sensible, `requiere_confirmacion` si delta > 15% |
 | `consultar_alacena` | Consulta qué ingredientes tiene el usuario disponibles | `pantry_service.get_pantry()` (Fase 2, EP-09) | Lectura |
 | `sugerir_comida` | Genera 1-3 opciones de comida priorizando alacena y preferencias | `meal_service.suggest_meals()` (Fase 2) | Lectura/generación |
-| `ajustar_horario_mensajes` | Cambia el horario en que el usuario prefiere recibir mensajes proactivos | `proactive_service.update_schedule()` (EP-07) | Escritura |
+| `ajustar_horario_mensajes` | Cambia el horario en que el usuario prefiere recibir mensajes proactivos | `proactive_service.update_schedule()` (EP-07) | Escritura, `requiere_confirmacion` |
 | `activar_modo_silencio` | Pausa temporalmente los mensajes proactivos | `proactive_service.set_silence_mode()` (EP-07) | Escritura |
-| `derivar_a_profesional` | Marca que el tema requiere derivación a nutriólogo/médico y genera el mensaje de derivación | `referral_service.flag_referral()` | Escritura sensible |
+| `derivar_a_profesional` | Marca que el tema requiere derivación a nutriólogo/médico y genera el mensaje de derivación | `referral_service.flag_referral()` | Escritura sensible, `requiere_confirmacion` |
 | `marcar_crisis` | Registra bandera de crisis emocional y dispara protocolo (nunca reemplaza a US-032, es el registro post-detección) | `safety_service.flag_crisis()` (US-032) | Escritura sensible — solo se invoca dentro del protocolo de US-032, no libremente desde el loop normal |
+| `confirmar_accion_pendiente` | Tool genérica: aplica el efecto de una acción que quedó propuesta (por una tool `requiere_confirmacion`) en un turno anterior | Despacha a la función de dominio original de la tool pendiente, usando el `tool_call.id` original como referencia | Escritura — ejecuta lo que otra tool dejó pendiente, nunca actúa por sí sola |
+| `pedir_aclaracion` | El modelo señala explícitamente que el mensaje es ambiguo y necesita una pregunta de clarificación, en vez de responder texto libre adivinando | `conversation_service.log_ambiguity()` — solo registra métrica, la pregunta la redacta el propio modelo en su respuesta | Lectura/telemetría — no cambia estado del usuario |
+| `actualizar_preferencia_alimentaria` *(placeholder — Fase 2, EP-15)* | Registra que el usuario rechazó o prefiere un tipo de alimento/estilo, para personalizar sugerencias futuras | `preference_service.update_preference()` (Fase 2) | Escritura — reemplaza el heurístico silencioso de "3 rechazos" por una decisión auditable del propio modelo |
+| `buscar_contexto_historico` *(placeholder de schema — Fase 2+, retrieval semántico)* | Busca en el historial de conversación de largo plazo del usuario algo relevante no presente en el contexto inmediato | `memory_service.semantic_search()` (Fase 2+, requiere pgvector — ver ADR-006) | Lectura — se declara el contrato ahora para no rediseñar el catálogo después, aunque la implementación real (embeddings) llega en Fase 2+ |
 
 - RF-2. Cada tool define su `input_schema` (JSON Schema) validado con Pydantic antes de ejecutar la función de dominio — **nunca se ejecuta una función de dominio con argumentos no validados, aunque vengan "del modelo"**
 - RF-3. Cada tool retorna un `ToolResult` con un resumen legible del resultado (lo que el modelo necesita para redactar la respuesta final), no el objeto de dominio crudo
 - RF-4. Las tools marcadas "Escritura sensible" (`registrar_peso`, `derivar_a_profesional`, `marcar_crisis`) tienen una capa adicional de validación determinista en la función de dominio (ver ADR-007, principio de defense-in-depth) — por ejemplo `registrar_peso` rechaza (pide confirmación explícita al usuario en el siguiente turno) un delta > 15% respecto al último registro
+- **RF-4bis. Mecanismo genérico `requiere_confirmacion` (ADR-007):** cualquier `ToolSpec` puede declarar `requiere_confirmacion=True`. Cuando el modelo invoca una de estas, el handler NO aplica el efecto — genera y persiste una "acción pendiente" (tabla `acciones_pendientes`: id, user_id, tool_name, arguments, expira_at) y retorna un `ToolResult` describiendo la propuesta en lenguaje natural para que el modelo se la presente al usuario. La tool `confirmar_accion_pendiente` (invocada en el turno siguiente cuando el usuario confirma) despacha el efecto real a la función de dominio original. Una acción pendiente no confirmada en 15 minutos expira y se descarta silenciosamente.
 - RF-5. El set de tools expuesto a Claude en cada request se filtra según: fase del producto habilitada (p. ej. `consultar_alacena` no existe hasta EP-09), y estado de la cuenta del usuario (p. ej. sin PAR-Q liberado, no se expone ninguna tool de ejercicio)
 - RF-6. Registro de auditoría: cada invocación de tool (nombre, argumentos, resultado, timestamp, éxito/error) se guarda en `historial_conversacion` o tabla dedicada `tool_calls_log`
 
@@ -2338,6 +2345,18 @@ CREATE TABLE tool_calls_log (
     arguments JSONB NOT NULL,
     result_summary TEXT,
     es_error BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT now()
+);
+
+-- RF-4bis: soporte del patrón "propone → confirma" (ADR-007)
+CREATE TABLE acciones_pendientes (
+    id UUID PRIMARY KEY,
+    user_id UUID REFERENCES users(id),
+    tool_name VARCHAR(50) NOT NULL,
+    arguments JSONB NOT NULL,
+    propuesta_texto TEXT NOT NULL,       -- lo que se le mostró al usuario
+    estado VARCHAR(20) DEFAULT 'pendiente',  -- pendiente, confirmada, expirada, descartada
+    expira_at TIMESTAMP NOT NULL,        -- created_at + 15 minutos
     created_at TIMESTAMP DEFAULT now()
 );
 ```
@@ -2447,7 +2466,73 @@ persistir turno completo en historial_conversacion
 
 **Notas técnicas:** Este es el componente más nuevo y menos probado del stack (tool-use en producción con datos de salud reales). Se recomienda un periodo de pruebas manuales intensivas (shadow mode: correr el loop y comparar contra el comportamiento esperado sin enviar la respuesta al usuario todavía) antes de exponerlo a usuarios reales — esto conecta con el punto de red-teaming conversacional ya identificado en `koach-analisis-brechas.md` (Parte 6, punto 6.5).
 
-**Fuera de alcance:** Memoria semántica de largo plazo vía embeddings/pgvector (mencionada en ADR-006 como "futuro") — este loop usa solo el contexto explícito que se le construye en RF-2, no retrieval automático.
+**Fuera de alcance:** Memoria semántica de largo plazo vía embeddings/pgvector (mencionada en ADR-006 como "futuro") — este loop usa solo el contexto explícito que se le construye en RF-2, no retrieval automático. El schema de la tool `buscar_contexto_historico` (US-159) ya se declara para no rediseñar el catálogo después, pero su implementación real llega en Fase 2+.
+
+---
+
+### US-161: Eval harness de tool-calling (conversaciones doradas)
+
+**Estimación:** 4 hrs | **Prioridad:** Alta
+
+**Como** desarrollador
+**Quiero** un conjunto de conversaciones de prueba con las tools esperadas, que corra en CI
+**Para que** un cambio al system prompt o al catálogo de tools no rompa silenciosamente el comportamiento del agente
+
+**Contexto:** US-160 depende de que el modelo elija bien entre tools parecidas (`registrar_comida` vs. `sugerir_comida`, por ejemplo). Un test unitario de cada tool aislada no detecta esto — hace falta un test de "dado este mensaje, ¿el modelo invoca la(s) tool(s) correcta(s)?". Esto es también lo que le da mordida real al procedimiento de rollback de prompts ya identificado como brecha (`koach-analisis-brechas.md`, punto 6.7): sin este harness, "rollback" es una promesa sin forma de verificar cuándo hace falta.
+
+**Requisitos Funcionales:**
+- RF-1. Conjunto inicial de 20-30 "conversaciones doradas": mensaje de entrada (o secuencia corta) + tool(s) esperada(s) + argumentos esperados (o rango tolerable)
+- RF-2. Cubre casos: intención simple (una tool), intención múltiple (dos tools en un turno), ambigüedad (`pedir_aclaracion`), y los casos límite de crisis/TCA usados en el red-teaming de M9 (para que esas pruebas queden versionadas, no solo ejecutadas una vez a mano)
+- RF-3. El runner ejecuta cada caso contra el `AIRouter` real (tier SMART) y compara qué tool(s) se invocaron contra lo esperado — no compara el texto de la respuesta final, que es no determinista
+- RF-4. Reporta un score de aciertos y lista explícita los casos fallidos con el diff (tool esperada vs. tool obtenida)
+- RF-5. Se corre manualmente antes de cualquier cambio a `app/ai/prompts/system/koach_base.yaml` o al catálogo de `TOOL_REGISTRY`, y se documenta el resultado en el commit
+
+**Requisitos No Funcionales:**
+- RNF-1. No requiere mockear el proveedor de IA — corre contra Claude real, porque lo que se valida es el comportamiento del modelo, no la integración
+- RNF-2. Debe poder correr un subconjunto rápido (5-6 casos críticos: crisis, TCA, comandos exactos) para iteración rápida, y el set completo para antes de un release
+
+**Contratos:**
+```python
+# tests/eval/tool_calling_cases.py
+
+@dataclass
+class CasoEval:
+    id: str
+    mensaje: str
+    contexto_usuario: dict
+    tools_esperadas: list[str]  # nombres de tools, orden no importa
+    categoria: str  # "simple", "multiple", "ambiguo", "crisis", "tca"
+
+CASOS_EVAL: list[CasoEval] = [
+    CasoEval(
+        id="simple-01",
+        mensaje="me comí 3 tacos de canasta",
+        contexto_usuario={...},
+        tools_esperadas=["registrar_comida"],
+        categoria="simple",
+    ),
+    CasoEval(
+        id="multiple-01",
+        mensaje="ya comí y ya no me mandes mensajes en la tarde",
+        contexto_usuario={...},
+        tools_esperadas=["registrar_comida", "ajustar_horario_mensajes"],
+        categoria="multiple",
+    ),
+    # ...
+]
+```
+
+**Criterios de Aceptación:**
+- [ ] CA-1: El set inicial de 20-30 casos está definido y cubre las 4 categorías (RF-2)
+- [ ] CA-2: El runner ejecuta el set completo y produce un score (% de aciertos)
+- [ ] CA-3: Un caso fallido muestra claramente qué tool se esperaba vs. cuál se invocó
+- [ ] CA-4: Los casos de crisis/TCA del red-teoing de M9 quedan incluidos como casos permanentes, no solo como prueba manual de un día
+
+**Dependencias:**
+- Requiere: US-159, US-160
+- Relacionado: brecha 6.5 (red-teaming, M9) y 6.7 (rollback de prompts) de `koach-analisis-brechas.md`
+
+**Fuera de alcance:** Evaluación de la calidad del *texto* de la respuesta final (tono, precisión nutricional) — eso queda cubierto por el red-teaming cualitativo de M9, no por este harness automatizado.
 
 ---
 
@@ -2478,13 +2563,15 @@ persistir turno completo en historial_conversacion
 
 ---
 
-### US-038: Scheduler de mensajes proactivos
+### US-038: Scheduler de mensajes proactivos (contenido generado por el loop agéntico — ver ADR-007)
 
-**Estimación:** 4 hrs | **Prioridad:** Crítica
+**Estimación:** 6 hrs (↑ desde 4 hrs — el contenido del mensaje ya no es un template fijo, se genera vía el mismo loop agéntico de US-160) | **Prioridad:** Crítica
+
+> **⚠️ Cambio de diseño (ADR-007):** originalmente esta US disparaba un template de WhatsApp fijo por tipo de mensaje. Se extiende para que, en vez de eso, construya un `CompletionRequest` con las tools relevantes al momento (p. ej. `consultar_alacena`, `sugerir_comida`, `consultar_alacena`) y deje que Claude decida el contenido real del mensaje saliente — el mismo loop agéntico de US-160, solo que iniciado por un job de Celery en vez de por un mensaje entrante del usuario. Esto unifica el codepath: hay un único orquestador agéntico en todo el sistema.
 
 **Como** agente
-**Quiero** enviar mensajes en los horarios de cada usuario
-**Para que** el acompañamiento sea real
+**Quiero** enviar mensajes en los horarios de cada usuario, con contenido decidido por el mismo razonamiento que usa para responder
+**Para que** el acompañamiento se sienta real y no como notificaciones fijas
 
 **Requisitos Funcionales:**
 - RF-1. Beat corre cada 15 minutos
@@ -2492,6 +2579,9 @@ persistir turno completo en historial_conversacion
 - RF-3. Respeta timezone del usuario
 - RF-4. Respeta modo silencio
 - RF-5. Distribución con jitter aleatorio (evitar picos)
+- **RF-6. Para cada usuario en ventana, invoca `agent_service.handle_proactive_trigger(user_id, tipo_mensaje)` en vez de `send_template()` directo** — este método construye el contexto y las tools apropiadas para ese `tipo_mensaje` (p. ej. un check-in de comida expone `consultar_alacena`/`sugerir_comida`; un recordatorio de ejercicio no las expone) y corre el mismo loop de US-160
+- **RF-7. Si el loop agéntico falla o excede el presupuesto de costo (US-134), cae a un template fijo de respaldo** — la proactividad nunca debe fallar en silencio; un mensaje simple es preferible a ningún mensaje
+- **RF-8. El tipo de mensaje proactivo sigue determinando qué tools se exponen (RF-6)** — esto evita que un simple "buenos días" dispare de forma innecesaria una llamada cara con el catálogo completo de tools
 
 **Algoritmo:**
 ```python
@@ -2512,6 +2602,13 @@ def check_scheduled_messages():
             args=[usuario.id, tipo_mensaje],
             countdown=delay,
         )
+
+@celery.task
+def send_proactive_message(user_id: UUID, tipo_mensaje: str):
+    try:
+        agent_service.handle_proactive_trigger(user_id, tipo_mensaje)  # loop agéntico (US-160)
+    except (ProviderUnavailableError, CostLimitExceededError):
+        fallback_service.send_static_template(user_id, tipo_mensaje)  # RF-7
 ```
 
 **Criterios de Aceptación:**
@@ -2519,6 +2616,11 @@ def check_scheduled_messages():
 - [ ] CA-2: Timezone diferente recibe a su hora local
 - [ ] CA-3: Modo silencio activo no recibe nada
 - [ ] CA-4: 500 usuarios a la misma hora no saturan la API
+- [ ] **CA-5: Un check-in de comida en ventana de alacena disponible sugiere algo coherente con lo que el usuario tiene, usando `consultar_alacena`/`sugerir_comida`**
+- [ ] **CA-6: Con el proveedor de IA caído, el usuario igual recibe un mensaje (fallback a template), nunca silencio total**
+
+**Dependencias:**
+- Requiere: US-159, US-160 (el loop agéntico debe existir antes de que la proactividad lo use)
 
 ---
 

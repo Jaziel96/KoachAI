@@ -1,6 +1,6 @@
 # KOACH — Índice Maestro de Documentos
 ### Guía de navegación del proyecto
-> Última actualización: Septiembre 2026 — agrega el rediseño agéntico (ADR-007) al plan SDD y al plan secuencial
+> Última actualización: Septiembre 2026 — agrega el rediseño agéntico (ADR-007) y sus refinamientos (confirmación genérica, proactividad vía el loop, eval harness) al plan SDD y al plan secuencial
 > Úsese como punto de entrada — lee esto primero antes que cualquier otro documento
 
 ---
@@ -25,10 +25,10 @@ Este proyecto tiene 7 documentos generados en distintos momentos de la planeaci�
 | 3 | `koach-analisis-brechas.md` | Auditoría de seguridad, legal y operativa — 34 brechas + Parte 6 (revisión final) + Parte 7 (resolución de políticas de IA y Meta) | ✅ Vigente — Parte 7 es lo más reciente sobre políticas de proveedores de IA |
 | 4 | `koach-adenda-legal-pendientes.md` | Marco legal NOM-043, rol del nutriólogo, registro de pendientes | ✅ **Fuente de verdad legal actual** |
 | 5 | `koach-plan-ejecucion-3meses.md` | Plan semana a semana, setup técnico, primeros 3 meses | ⚠️ Presupuesto y precios desactualizados (ver correcciones) |
-| 6 | `koach-plan-desarrollo-sdd.md` | Arquitectura técnica, épicas, 46+ User Stories detalladas | ✅ Vigente — v1.1 agrega ADR-007 (arquitectura agéntica con tool-use nativo), extiende US-006/US-009, reduce alcance de US-031, agrega US-159/US-160. Pendiente agregar EP-31 y EP-32 formalmente (ver abajo) |
+| 6 | `koach-plan-desarrollo-sdd.md` | Arquitectura técnica, épicas, 47+ User Stories detalladas | ✅ Vigente — v1.2. v1.1 agregó ADR-007, extendió US-006/US-009, redujo alcance de US-031, agregó US-159/US-160. v1.2 agrega el patrón "propone→confirma" genérico, extiende US-038 (proactividad vía el loop agéntico) y agrega US-161 (eval harness de tool-calling). Pendiente agregar EP-31 y EP-32 formalmente (ver abajo) |
 | 7 | `koach-adenda-validacion-modelo-conversacional.md` | Hallazgos de entrevistas + rediseño del modelo de sugerencia de comidas | ✅ Vigente |
 | 8 | `koach-ciclo-vida-usuario.md` | Estados de cuenta, activación de pago, verificación de identidad | ✅ Vigente |
-| 9 | `koach-plan-desarrollo-secuencial.md` | Orden de ejecución por hitos (M1-M12, incluyendo M9 bis), horas, pruebas de uso en cada punto | ✅ Vigente — v1.1 agrega hito M9 bis (núcleo agéntico), total ahora ≈165 hrs Fase 0-1 |
+| 9 | `koach-plan-desarrollo-secuencial.md` | Orden de ejecución por hitos (M1-M12, incluyendo M9 bis), horas, pruebas de uso en cada punto | ✅ Vigente — v1.2, total ahora ≈172 hrs Fase 0-1 |
 | 10 | `koach-analisis-costos-actualizado.md` | Costo real de WhatsApp Cloud API + comparativa Claude/Gemini/DeepSeek/Qwen | ✅ **Documento más reciente — corrige tablas financieras de docs 1 y 5** |
 
 **Regla general de jerarquía:** cuando dos documentos se contradicen, gana el más reciente. Orden cronológico: 1 → 2 → 3 → 4 → 5 → 6 → 7.
@@ -144,5 +144,5 @@ Técnicamente ya se decidió que lo reemplaza, pero falta que esto se refleje co
 
 ---
 
-*Índice Maestro Koach v1.1*
+*Índice Maestro Koach v1.2*
 *Generado para organizar el proyecto en claude.ai antes de iniciar desarrollo SDD*
