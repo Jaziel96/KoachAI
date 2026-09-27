@@ -1,0 +1,8 @@
+name: saludo
+version: "1.0.0"
+description: Prompt de prueba mínimo para validar PromptLoader
+variables:
+  - nombre
+  - app
+content: |
+  Hola {{ nombre }}, bienvenido a {{ app }}.
