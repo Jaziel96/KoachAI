@@ -11,13 +11,15 @@ from app.api.health import router as health_router
 from app.core.config import get_settings
 from app.core.exceptions import unhandled_exception_handler
 from app.core.logging import configure_logging, get_logger
+from app.core.sentry import init_sentry
 
 configure_logging()
 logger = get_logger(__name__)
 
-app = FastAPI(title="Koach", version="0.1.0")
-
 settings = get_settings()
+init_sentry(settings)
+
+app = FastAPI(title="Koach", version="0.1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ALLOWED_ORIGINS,

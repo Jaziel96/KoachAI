@@ -42,6 +42,9 @@ class Settings(BaseSettings):
     # HTTP
     CORS_ALLOWED_ORIGINS: list[str] = []
 
+    # Observabilidad
+    SENTRY_DSN: str | None = None
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
