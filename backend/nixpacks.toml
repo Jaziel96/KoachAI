@@ -1,0 +1,17 @@
+# Configuración de build/deploy para Railway (Nixpacks) — US-004.
+#
+# Railway detecta Python automáticamente, pero este proyecto usa pyproject.toml
+# sin requirements.txt (ver US-001 — pyproject es la única fuente de
+# dependencias), así que se especifica el install command explícito.
+#
+# Requiere que en Railway el "Root Directory" del servicio esté configurado
+# como `backend` (el repo es un monorepo con backend/, frontend-web/, mobile/).
+
+[phases.install]
+cmds = ["pip install --upgrade pip", "pip install -e ."]
+
+[start]
+# Corre migraciones antes de levantar el server (CA-4: migraciones automáticas
+# en cada deploy). Si `alembic upgrade head` falla, el deploy falla — no deja
+# la app corriendo contra un esquema desactualizado.
+cmd = "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT"

@@ -22,6 +22,9 @@ Documentos de referencia en `docs/`:
 - `analisis-brechas.md` — especifica EP-31 (US-134 a US-144): circuit breaker de costos, prompt injection, detección de TCA, protocolo de derivación, rate limiting, panel admin, ARCO, retención de datos
 - `ciclo-vida-usuario.md` — especifica US-153 a US-157: estados de cuenta, activación de pago, verificación de identidad
 - `adenda-legal-pendientes.md` — marco NOM-043 y lenguaje obligatorio del producto
+- `adenda-validacion-modelo-conversacional.md` — **especificación completa del modelo conversacional de alimentación** (US-145 a US-148, EP-09 ampliada): Koach nunca prescribe, siempre negocia — máximo 3 opciones, prioriza alacena, nunca prohíbe. Trae el bloque exacto que va al system prompt de la tool `sugerir_comida` y el diseño completo de registro por foto (EP-32, Fase 2+, US-149 a US-152). **Consulta este documento antes de tocar cualquier cosa de sugerencia de comidas o registro por foto — no está cubierto en detalle en ningún otro doc.**
+- `analisis-competencia.md` — investigación de mercado (Fitia, Zapia, Smart Fit Coach, Google Health). **Solo contexto de negocio/producto — no aporta nada técnico, no hace falta leerlo para implementar.**
+- `plan-ejecucion-3meses.md` — plan operativo original de arranque (setup de cuentas, redes, dominios). **Histórico — trae su propia nota de vigencia al inicio marcando qué partes ya no aplican** (numeración de US, estructura de carpetas, presupuesto). No usarlo como guía técnica.
 
 **Regla de jerarquía entre documentos:** cuando `plan-maestro.md` contradice a cualquier
 otro documento en `docs/`, gana el otro documento (más reciente) — pero eso no significa

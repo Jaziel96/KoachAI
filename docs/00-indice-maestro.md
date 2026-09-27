@@ -1,37 +1,39 @@
 # KOACH — Índice Maestro de Documentos
 ### Guía de navegación del proyecto
-> Última actualización: Septiembre 2026 — agrega el rediseño agéntico (ADR-007) y sus refinamientos (confirmación genérica, proactividad vía el loop, eval harness) al plan SDD y al plan secuencial
+> Última actualización: Septiembre 2026 — agrega el rediseño agéntico (ADR-007) y sus refinamientos (confirmación genérica, proactividad vía el loop, eval harness) al plan SDD y al plan secuencial. También registra que TODOS los documentos de este índice ya están concentrados en el repositorio real, en `docs/` (ver tabla abajo).
 > Úsese como punto de entrada — lee esto primero antes que cualquier otro documento
 
 ---
 
 ## 🎯 CÓMO USAR ESTE ÍNDICE
 
-Este proyecto tiene 7 documentos generados en distintos momentos de la planeación. Algunos se quedaron parcialmente obsoletos por decisiones posteriores. Este índice te dice:
+Este proyecto tiene varios documentos generados en distintos momentos de la planeación. Algunos se quedaron parcialmente obsoletos por decisiones posteriores. Este índice te dice:
 
 1. Qué contiene cada documento
 2. Cuál es la fuente de verdad vigente para cada tema
 3. Qué está resuelto y qué sigue pendiente
 4. Por dónde retomar según en qué momento estés
+5. Dónde vive cada documento en el repositorio real (`docs/`)
 
 ---
 
-## 📚 LOS 7 DOCUMENTOS
+## 📚 LOS DOCUMENTOS
 
-| # | Documento | Qué contiene | Vigencia |
-|---|-----------|--------------|----------|
-| 1 | `koach-plan-maestro-v6.md` | Producto, arquitectura, negocio, marketing — documento base completo | ⚠️ Parcialmente superado (ver correcciones abajo) |
-| 2 | `koach-analisis-competencia.md` | Investigación de Fitia, Zapia, Smart Fit Coach, Google Health y otros | ✅ Vigente |
-| 3 | `koach-analisis-brechas.md` | Auditoría de seguridad, legal y operativa — 34 brechas + Parte 6 (revisión final) + Parte 7 (resolución de políticas de IA y Meta) | ✅ Vigente — Parte 7 es lo más reciente sobre políticas de proveedores de IA |
-| 4 | `koach-adenda-legal-pendientes.md` | Marco legal NOM-043, rol del nutriólogo, registro de pendientes | ✅ **Fuente de verdad legal actual** |
-| 5 | `koach-plan-ejecucion-3meses.md` | Plan semana a semana, setup técnico, primeros 3 meses | ⚠️ Presupuesto y precios desactualizados (ver correcciones) |
-| 6 | `koach-plan-desarrollo-sdd.md` | Arquitectura técnica, épicas, 47+ User Stories detalladas | ✅ Vigente — v1.2. v1.1 agregó ADR-007, extendió US-006/US-009, redujo alcance de US-031, agregó US-159/US-160. v1.2 agrega el patrón "propone→confirma" genérico, extiende US-038 (proactividad vía el loop agéntico) y agrega US-161 (eval harness de tool-calling). Pendiente agregar EP-31 y EP-32 formalmente (ver abajo) |
-| 7 | `koach-adenda-validacion-modelo-conversacional.md` | Hallazgos de entrevistas + rediseño del modelo de sugerencia de comidas | ✅ Vigente |
-| 8 | `koach-ciclo-vida-usuario.md` | Estados de cuenta, activación de pago, verificación de identidad | ✅ Vigente |
-| 9 | `koach-plan-desarrollo-secuencial.md` | Orden de ejecución por hitos (M1-M12, incluyendo M9 bis), horas, pruebas de uso en cada punto | ✅ Vigente — v1.2, total ahora ≈172 hrs Fase 0-1 |
-| 10 | `koach-analisis-costos-actualizado.md` | Costo real de WhatsApp Cloud API + comparativa Claude/Gemini/DeepSeek/Qwen | ✅ **Documento más reciente — corrige tablas financieras de docs 1 y 5** |
+| # | Documento (claude.ai) | Ruta en el repo (`docs/`) | Qué contiene | Vigencia |
+|---|-----------|---------------------------|--------------|----------|
+| 1 | `koach-plan-maestro-v6.md` | `plan-maestro.md` | Producto, arquitectura, negocio, marketing — documento base completo, incluye el esquema de base de datos completo (sección 14) | ⚠️ Parcialmente superado (ver correcciones abajo) — trae su propia nota de vigencia al inicio del archivo en el repo |
+| 2 | `koach-analisis-competencia.md` | `analisis-competencia.md` | Investigación de Fitia, Zapia, Smart Fit Coach, Google Health y otros | ✅ Vigente — solo contexto de negocio, no técnico |
+| 3 | `koach-analisis-brechas.md` | `analisis-brechas.md` | Auditoría de seguridad, legal y operativa — 34 brechas + Parte 6 (revisión final) + Parte 7 (resolución de políticas de IA y Meta) | ✅ Vigente — Parte 7 es lo más reciente sobre políticas de proveedores de IA |
+| 4 | `koach-adenda-legal-pendientes.md` | `adenda-legal-pendientes.md` | Marco legal NOM-043, rol del nutriólogo, registro de pendientes | ✅ **Fuente de verdad legal actual** |
+| 5 | `koach-plan-ejecucion-3meses.md` | `plan-ejecucion-3meses.md` | Plan semana a semana, setup técnico, primeros 3 meses | ⚠️ Presupuesto, numeración de US y estructura de carpetas desactualizados — trae su propia nota de vigencia al inicio del archivo en el repo |
+| 6 | `koach-plan-desarrollo-sdd.md` | `plan-desarrollo-sdd.md` | Arquitectura técnica, épicas, 47+ User Stories detalladas | ✅ Vigente — v1.2. v1.1 agregó ADR-007, extendió US-006/US-009, redujo alcance de US-031, agregó US-159/US-160. v1.2 agrega el patrón "propone→confirma" genérico, extiende US-038 (proactividad vía el loop agéntico) y agrega US-161 (eval harness de tool-calling). Pendiente agregar EP-31 y EP-32 formalmente (ver abajo) |
+| 7 | `koach-adenda-validacion-modelo-conversacional.md` | `adenda-validacion-modelo-conversacional.md` | Hallazgos de entrevistas + rediseño del modelo de sugerencia de comidas + diseño de registro por foto | ✅ Vigente |
+| 8 | `koach-ciclo-vida-usuario.md` | `ciclo-vida-usuario.md` | Estados de cuenta, activación de pago, verificación de identidad | ✅ Vigente |
+| 9 | `koach-plan-desarrollo-secuencial.md` | `plan-desarrollo-secuencial.md` | Orden de ejecución por hitos (M1-M12, incluyendo M9 bis), horas, pruebas de uso en cada punto | ✅ Vigente — v1.2, total ahora ≈172 hrs Fase 0-1 |
 
-**Regla general de jerarquía:** cuando dos documentos se contradicen, gana el más reciente. Orden cronológico: 1 → 2 → 3 → 4 → 5 → 6 → 7.
+**Nota sobre costos:** no existe un documento separado "de costos actualizados" — las correcciones de costo real de WhatsApp Cloud API y comparativa de proveedores de IA viven dentro de `analisis-brechas.md` y de la nota de vigencia al inicio de `plan-maestro.md`. (Una versión anterior de este índice mencionaba un documento `koach-analisis-costos-actualizado.md` que nunca llegó a crearse como archivo independiente — se corrige aquí para evitar confusión.)
+
+**Regla general de jerarquía:** cuando dos documentos se contradicen, gana el más reciente. Orden cronológico: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9. `CLAUDE.md` en la raíz del repo apunta a cada uno de estos archivos con las mismas reglas de vigencia.
 
 ---
 
@@ -49,7 +51,7 @@ Este proyecto tiene 7 documentos generados en distintos momentos de la planeaci�
 | Sin circuit breaker de costos de IA | 🔴 Brecha crítica identificada, ahora es US-134 | Doc 3, sección 2.1 |
 | Sin defensa de prompt injection | 🔴 Brecha crítica identificada, ahora es US-135 | Doc 3, sección 2.2 |
 | Sin detección de trastornos alimentarios | 🔴 Brecha crítica identificada, ahora es US-136 | Doc 3, sección 3.2 |
-| Costo de WhatsApp Cloud API asumido en $0 | ⚠️ Corregido — ~$1.20-2.16 USD/usuario/mes real | Doc 10, Parte 1 y 3 |
+| Costo de WhatsApp Cloud API asumido en $0 | ⚠️ Corregido — ~$1.20-2.16 USD/usuario/mes real | Doc 3, sección de costos |
 
 ### Sobre el Plan de Ejecución 3 Meses (doc 5)
 
@@ -58,6 +60,7 @@ Este proyecto tiene 7 documentos generados en distintos momentos de la planeaci�
 | Presupuesto inicial ~$850-2,950 MXN | ⚠️ Ajustar: con validación de nutriólogo + legal, inversión real ronda $12,000-17,000 MXN distribuidos (ver doc 4, Parte 2) |
 | No contemplaba semana de validación previa | 🔴 Las entrevistas (doc 7) deben completarse ANTES de escribir código de producción |
 | Cronograma no incluye tiempo para brechas de seguridad (EP-31) | Agregar ~36 hrs / 1 semana extra al cronograma técnico |
+| Numeración de US-001 a US-008 y estructura de carpetas | ❌ Reemplazadas por la numeración real de `plan-desarrollo-sdd.md` y la arquitectura hexagonal (ADR-001) |
 
 ### Sobre el Plan SDD (doc 6)
 
@@ -86,6 +89,7 @@ Este proyecto tiene 7 documentos generados en distintos momentos de la planeaci�
 - Marco normativo identificado: NOM-043-SSA2-2012 habilita el modelo
 - Modelo conversacional de comida (negociación, no prescripción)
 - Metodología SDD con specs y User Stories detalladas
+- Todos los documentos de planeación concentrados en el repositorio real (`docs/`), referenciados desde `CLAUDE.md`
 
 ### 🔴 Pendiente crítico — bloquea avanzar a código de producción
 - [ ] **Completar 12 entrevistas de validación restantes** (van 3/15) — doc 7, Parte 1
@@ -140,9 +144,9 @@ Las 3 entrevistas apuntan a ~$137 MXN de disposición real. Esto afecta el model
 Sin esto, no puedes cobrar sin riesgo legal real. Es la brecha que más bloquea el avance. Doc 4 ya trae todo listo para abordarlo — falta ejecutar la conversación.
 
 **3. ¿El modelo conversacional (doc 7) reemplaza o convive con el plan semanal fijo (doc 1)?**
-Técnicamente ya se decidió que lo reemplaza, pero falta que esto se refleje consistentemente en TODO el material de marketing y en el plan SDD antes de programar EP-09.
+Técnicamente ya se decidió que lo reemplaza, y ya se reflejó consistentemente en el plan SDD (EP-09 ampliada, US-145 a US-148). Falta que se refleje también en todo el material de marketing cuando se retome ese trabajo.
 
 ---
 
-*Índice Maestro Koach v1.2*
-*Generado para organizar el proyecto en claude.ai antes de iniciar desarrollo SDD*
+*Índice Maestro Koach v1.3*
+*Generado para organizar el proyecto en claude.ai y mantenerlo espejado 1:1 con el repositorio real*
