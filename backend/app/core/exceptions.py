@@ -5,6 +5,7 @@ se registra completa en el log (para diagnóstico interno) pero al cliente se
 le responde un 500 genérico, sin exponer el stack trace ni el mensaje interno.
 """
 
+import sentry_sdk
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 
@@ -21,6 +22,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
         method=request.method,
         exc_info=exc,
     )
+    sentry_sdk.capture_exception(exc)
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"detail": "Ocurrió un error interno. Ya fue registrado."},
