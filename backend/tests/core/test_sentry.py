@@ -71,3 +71,66 @@ def test_scrub_pii_no_altera_evento_sin_pii() -> None:
     result = scrub_pii(dict(event), {})  # type: ignore[arg-type]
 
     assert result == event
+
+
+def test_scrub_pii_enmascara_wa_id_sin_prefijo_mas() -> None:
+    """El `wa_id` de WhatsApp Cloud API llega sin '+' — es el formato principal."""
+    event: dict[str, Any] = {"message": "fallo con wa_id=5215512345678 y +5215587654321"}
+
+    result = scrub_pii(event, {})  # type: ignore[arg-type]
+
+    assert result is not None
+    assert "5512345678" not in result["message"]
+    assert "5587654321" not in result["message"]
+    assert result["message"] == "fallo con wa_id=52****5678 y +52****4321"
+
+
+def test_scrub_pii_no_enmascara_identificadores_largos() -> None:
+    event: dict[str, Any] = {"message": "trace 1234567890123456789012"}
+
+    result = scrub_pii(event, {})  # type: ignore[arg-type]
+
+    assert result is not None
+    assert result["message"] == "trace 1234567890123456789012"
+
+
+def test_scrub_pii_elimina_variables_locales_de_frames() -> None:
+    event: dict[str, Any] = {
+        "exception": {
+            "values": [
+                {
+                    "value": "boom",
+                    "stacktrace": {
+                        "frames": [
+                            {"filename": "app/x.py", "vars": {"w": "82", "phone": "+525512345678"}}
+                        ]
+                    },
+                }
+            ]
+        }
+    }
+
+    result = scrub_pii(event, {})  # type: ignore[arg-type]
+
+    assert result is not None
+    frame = result["exception"]["values"][0]["stacktrace"]["frames"][0]
+    assert "vars" not in frame
+    assert frame["filename"] == "app/x.py"  # `filename` no debe confundirse con `name`
+
+
+def test_scrub_pii_filtra_breadcrumbs_y_request() -> None:
+    event: dict[str, Any] = {
+        "breadcrumbs": {"values": [{"message": "user +525512345678", "data": {"peso_kg": 82}}]},
+        "request": {"data": {"peso": 82, "ok": 1}, "query_string": "phone=+525512345678"},
+        "tags": {"wa_id": "5215512345678", "env": "prod"},
+    }
+
+    result = scrub_pii(event, {})  # type: ignore[arg-type]
+
+    assert result is not None
+    crumb = result["breadcrumbs"]["values"][0]
+    assert crumb["message"] == "user +52****5678"
+    assert "peso_kg" not in crumb["data"]
+    assert result["request"]["data"] == {"ok": 1}
+    assert result["request"]["query_string"] == "phone=+52****5678"
+    assert result["tags"] == {"env": "prod"}

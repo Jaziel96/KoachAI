@@ -16,36 +16,49 @@ from app.core.logging import get_logger
 
 logger = get_logger(__name__)
 
-_PHONE_PATTERN = re.compile(r"(\+52)(\d{6})(\d{4})")
+# Teléfonos mexicanos en los formatos que realmente llegan: "+525512345678",
+# "+5215512345678" y el `wa_id` de WhatsApp Cloud API, que viene SIN "+"
+# ("5215512345678"). Se exige que no haya más dígitos pegados antes/después
+# para no enmascarar identificadores largos que no son teléfonos.
+_PHONE_PATTERN = re.compile(r"(?<!\d)(\+?52)1?\d{6}(\d{4})(?!\d)")
 
-_SENSITIVE_KEYS = frozenset(
-    {
-        "nombre",
-        "name",
-        "first_name",
-        "last_name",
-        "phone",
-        "telefono",
-        "peso",
-        "weight",
-        "altura",
-        "height",
-        "imc",
-        "bmi",
-        "condiciones_medicas",
-        "medical_conditions",
-        "email",
-    }
+# Claves (como token completo, separado por "_") cuyo valor nunca debe salir.
+# Se compara por token y no por subcadena para no romper campos técnicos como
+# `filename` del stacktrace.
+_SENSITIVE_KEY_PATTERN = re.compile(
+    r"(^|_)(nombre|name|first_name|last_name|email|peso|weight|"
+    r"talla|altura|height|imc|bmi|condiciones?|medical|alergias?|lesiones?|"
+    r"medicamentos?|calorias?)(_|$)",
+    re.IGNORECASE,
+)
+
+# Claves que son, por sí mismas, un teléfono: se eliminan. Cualquier otra clave
+# con un teléfono en su valor (p. ej. `telefono_contacto`) se conserva pero
+# enmascarada, para que el reporte siga siendo depurable (CA-3).
+_PHONE_KEY_PATTERN = re.compile(r"^(phone|telefono|wa_id)$", re.IGNORECASE)
+
+# Secciones del evento de Sentry que se filtran. `sdk`, `platform`, `event_id`,
+# `timestamp`, etc. son metadatos técnicos y se dejan intactos.
+_SCRUBBED_SECTIONS = (
+    "user",
+    "extra",
+    "contexts",
+    "tags",
+    "request",
+    "breadcrumbs",
+    "exception",
+    "logentry",
+    "message",
 )
 
 
 def _mask_phones(value: str) -> str:
     """Reemplaza cualquier teléfono mexicano en `value` por `+52****XXXX`."""
-    return _PHONE_PATTERN.sub(lambda m: f"{m.group(1)}****{m.group(3)}", value)
+    return _PHONE_PATTERN.sub(lambda m: f"{m.group(1)}****{m.group(2)}", value)
 
 
 def _scrub_value(value: Any) -> Any:
-    """Aplica enmascarado de teléfonos recursivamente sobre strings, dicts y listas."""
+    """Aplica el filtrado recursivamente sobre strings, dicts y listas."""
     if isinstance(value, str):
         return _mask_phones(value)
     if isinstance(value, dict):
@@ -56,36 +69,32 @@ def _scrub_value(value: Any) -> Any:
 
 
 def _scrub_dict(data: dict[str, Any]) -> dict[str, Any]:
-    """Elimina claves de PII/salud conocidas y enmascara teléfonos en el resto."""
-    scrubbed: dict[str, Any] = {}
-    for key, value in data.items():
-        if key.lower() in _SENSITIVE_KEYS:
-            continue
-        scrubbed[key] = _scrub_value(value)
-    return scrubbed
+    """Elimina claves de PII/salud y enmascara teléfonos en el resto."""
+    return {
+        key: _scrub_value(value)
+        for key, value in data.items()
+        if not _SENSITIVE_KEY_PATTERN.search(key) and not _PHONE_KEY_PATTERN.match(key)
+    }
+
+
+def _drop_frame_vars(event: Event) -> None:
+    """Elimina las variables locales de cada frame del stacktrace.
+
+    Los nombres de variables locales no son predecibles (`w`, `x`, `tmp`...), así
+    que no se pueden filtrar por clave: para datos de salud lo seguro es no
+    enviarlas nunca.
+    """
+    for exc in (event.get("exception") or {}).get("values", []):
+        for frame in (exc.get("stacktrace") or {}).get("frames", []):
+            frame.pop("vars", None)
 
 
 def scrub_pii(event: Event, hint: Hint) -> Event | None:
     """Hook `before_send`: enmascara teléfonos y elimina PII/datos de salud."""
-    if "user" in event and isinstance(event["user"], dict):
-        event["user"] = _scrub_dict(event["user"])
-
-    if "extra" in event and isinstance(event["extra"], dict):
-        event["extra"] = _scrub_dict(event["extra"])
-
-    if "contexts" in event and isinstance(event["contexts"], dict):
-        event["contexts"] = {
-            ctx_key: _scrub_dict(ctx_value) if isinstance(ctx_value, dict) else ctx_value
-            for ctx_key, ctx_value in event["contexts"].items()
-        }
-
-    if event.get("message"):
-        event["message"] = _mask_phones(event["message"])
-
-    for exc in event.get("exception", {}).get("values", []) if event.get("exception") else []:
-        if exc.get("value"):
-            exc["value"] = _mask_phones(exc["value"])
-
+    _drop_frame_vars(event)
+    for section in _SCRUBBED_SECTIONS:
+        if section in event:
+            event[section] = _scrub_value(event[section])  # type: ignore[literal-required]
     return event
 
 
@@ -99,5 +108,7 @@ def init_sentry(settings: Settings) -> None:
         dsn=settings.SENTRY_DSN,
         environment=settings.ENVIRONMENT,
         before_send=scrub_pii,
+        send_default_pii=False,
+        include_local_variables=False,
     )
     logger.info("sentry_enabled", environment=settings.ENVIRONMENT)
