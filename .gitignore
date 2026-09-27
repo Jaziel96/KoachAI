@@ -16,3 +16,6 @@ __pycache__/
 *.swp
 *.swn
 *.swo
+
+# Virtualenv del backend
+backend/.venv/
