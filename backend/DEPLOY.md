@@ -1,22 +1,28 @@
 # Deploy a Railway (US-004)
 
+> ⏸️ **PAUSADO — 27 sep 2026.** Retomar aquí:
+> - ✅ Repo GitHub listo: `https://github.com/Jaziel96/KoachAI` (push forzado,
+>   reemplazó un intento anterior — ver commit `db7135b` en adelante).
+> - ✅ Proyecto Railway ya creado: nombre **`exquisite-hope`**
+>   (`railway.com/project/7b921bca-134b-4d1c-a782-398150bcb7e2`), ambiente
+>   `production`. Está **vacío** — el canvas del proyecto no tiene ningún
+>   servicio todavía.
+> - ⏳ **Siguiente paso pendiente**: en el canvas del proyecto (ícono de
+>   árbol/nodos en la barra lateral, no el de engranaje ⚙️) → **"+ New"** →
+>   **"GitHub Repo"** → seleccionar `Jaziel96/KoachAI`. Eso crea la tarjeta del
+>   servicio. Luego click en esa tarjeta para llegar a sus pestañas
+>   (Deployments/Variables/Settings) y continuar desde el **paso 2** de abajo
+>   (Root Directory = `backend`, Redis, variables, dominio).
+> - El repo ya tiene todo lo necesario (`backend/nixpacks.toml` con el start
+>   command que corre migraciones); no hace falta tocar código, solo
+>   configuración en el dashboard de Railway.
+
 Pasos manuales — requieren tu cuenta de GitHub y Railway, no se pueden
 automatizar desde aquí.
 
-## 1. Crear el repo en GitHub
+## 1. Repo en GitHub
 
-```bash
-# Desde la raíz del proyecto (no backend/)
-gh repo create koach --private --source=. --remote=origin
-git push -u origin master
-```
-
-O manualmente: crea el repo vacío en github.com, luego:
-
-```bash
-git remote add origin https://github.com/<tu-usuario>/koach.git
-git push -u origin master
-```
+✅ Ya hecho — `https://github.com/Jaziel96/KoachAI`, rama `master`.
 
 ## 2. Crear el proyecto en Railway
 
