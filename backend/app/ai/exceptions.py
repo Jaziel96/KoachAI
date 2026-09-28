@@ -19,3 +19,20 @@ class ContentFilterError(AIProviderError):
 
 class ToolsNotSupportedError(AIProviderError):
     """El request incluye `tools` pero el proveedor declara `supports_tools = False` (RNF-3)."""
+
+
+class UnsupportedTierError(AIProviderError):
+    """Se pidió un `ModelTier` que este proveedor no atiende.
+
+    Es un error de configuración o de programación, no de disponibilidad: el
+    router NO debe tratarlo como caída del proveedor ni hacer fallback en
+    silencio, porque eso escondería el bug.
+    """
+
+
+class InvalidResponseError(AIProviderError):
+    """El proveedor respondió, pero el contenido no cumple lo pedido.
+
+    Por ejemplo, JSON inválido en `json_mode`. Nunca se devuelve basura como si
+    fuera una respuesta válida.
+    """
