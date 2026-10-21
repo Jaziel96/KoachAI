@@ -44,14 +44,18 @@ class PromptVariableError(Exception):
 
 class _CacheEntry(BaseModel):
     template: PromptTemplate
-    mtime: float
+    mtime_ns: int
+    size: int
 
 
 class PromptLoader:
     """Carga prompts YAML desde disco con caché en memoria (RF-3).
 
-    El caché se invalida automáticamente cuando cambia el mtime del archivo
-    (CA-3: permite editar el YAML en dev sin reiniciar el proceso).
+    El caché se invalida automáticamente cuando cambia el mtime o el tamaño
+    del archivo (CA-3: permite editar el YAML en dev sin reiniciar el
+    proceso). Se comparan ambos, no solo el mtime: en NTFS dos escrituras muy
+    seguidas pueden compartir el mismo timestamp, y el tamaño es una segunda
+    señal barata que detecta ese caso (defense in depth, CLAUDE.md regla #8).
     """
 
     def __init__(self, base_path: Path) -> None:
@@ -63,14 +67,20 @@ class PromptLoader:
         if not path.is_file():
             raise PromptNotFoundError(prompt_id)
 
-        mtime = path.stat().st_mtime
+        stat = path.stat()
         cached = self._cache.get(prompt_id)
-        if cached is not None and cached.mtime == mtime:
+        sin_cambios = cached is not None and (cached.mtime_ns, cached.size) == (
+            stat.st_mtime_ns,
+            stat.st_size,
+        )
+        if cached is not None and sin_cambios:
             return cached.template
 
         raw = yaml.safe_load(path.read_text(encoding="utf-8"))
         template = PromptTemplate.model_validate(raw)
-        self._cache[prompt_id] = _CacheEntry(template=template, mtime=mtime)
+        self._cache[prompt_id] = _CacheEntry(
+            template=template, mtime_ns=stat.st_mtime_ns, size=stat.st_size
+        )
         return template
 
     def render(self, prompt_id: str, **kwargs: object) -> str:

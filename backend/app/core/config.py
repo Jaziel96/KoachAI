@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     # AI
     AI_STRATEGY: Literal["api", "hybrid", "local"] = "api"
     AI_SMART_PROVIDER: str = "anthropic"
-    AI_FAST_PROVIDER: str = "gemini"
+    AI_FAST_PROVIDER: str = "anthropic"
     ANTHROPIC_API_KEY: SecretStr | None = None
     GEMINI_API_KEY: SecretStr | None = None
     ANTHROPIC_MODEL_FAST: str = "claude-haiku-4-5"

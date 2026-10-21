@@ -89,7 +89,7 @@ async def health(response: Response) -> HealthResponse:
     )
     ai_fast_check = _check_ai_provider(
         provider=settings.AI_FAST_PROVIDER,
-        api_key_set=settings.GEMINI_API_KEY is not None,
+        api_key_set=settings.ANTHROPIC_API_KEY is not None,
     )
 
     checks = {
