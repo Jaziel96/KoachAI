@@ -71,6 +71,13 @@ Este proyecto tiene varios documentos generados en distintos momentos de la plan
 - US-159 (catálogo de herramientas) y US-160 (bucle agéntico principal) — nuevas, en EP-06 bis
 - Reflejado también en doc 9 como el nuevo hito M9 bis
 
+**Nuevo (septiembre 2026): ADR-008 — Dashboard también en web.** Para maximizar cobertura
+de mercado, el dashboard (Fase 3) se construye como rutas autenticadas dentro del mismo
+proyecto Next.js del sitio de marketing (`koach.mx`), no solo dentro de la app nativa —
+cualquiera puede usarlo desde el navegador sin instalar nada. La app móvil (React Native +
+Expo) sigue construyéndose como canal adicional, no como prerrequisito. Ver ADR-008 completo
+en doc 6, y el hito de Fase 3 actualizado en doc 9.
+
 **Pendiente de agregar formalmente al documento** (mencionado en otros docs pero no integrado a la numeración de épicas):
 
 - **EP-31 — Seguridad y Cumplimiento** (US-134 a US-144, ~36 hrs) — detallado en doc 3, sección final

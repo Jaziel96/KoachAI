@@ -941,6 +941,17 @@ Ver progreso, explorar, personalizar, configurar.
 - Tabla `historial_conversacion` con campo `canal`
 - Usuario puede empezar conversación en WA, continuar en app sin perder contexto
 
+### 12.3bis Dashboard también disponible en web (agregado septiembre 2026, ADR-008)
+
+Para maximizar la cobertura de mercado, el dashboard (Mi Plan, Progreso, Alacena,
+Reportes) no depende exclusivamente de instalar la app nativa. Vive como rutas
+autenticadas dentro del **mismo proyecto Next.js** que la landing de marketing
+(`koach.mx`), de forma que cualquier persona puede entrar desde su navegador —
+computadora o celular — sin instalar nada, igual que ya sucede con WhatsApp. La app
+nativa (React Native + Expo) sigue construyéndose en Fase 3 como canal adicional, con
+mejor experiencia para notificaciones push y cámara, pero no es requisito para usar el
+dashboard. Detalle técnico completo: ADR-008 en `docs/plan-desarrollo-sdd.md`.
+
 ### 12.4 Estructura de la app móvil
 
 **Pantalla Home:**
@@ -1005,7 +1016,7 @@ Ver progreso, explorar, personalizar, configurar.
 | Mensajería | WhatsApp Cloud API | Oficial Meta |
 | Mapas | Google Places API | Gyms cercanos |
 | App móvil | React Native + Expo | iOS/Android único código |
-| Web | Next.js 14 + TypeScript + Tailwind | Robusta, SEO, gratis Vercel |
+| Web | Next.js 14 + TypeScript + Tailwind | Robusta, SEO, gratis Vercel — **incluye el dashboard autenticado en el mismo proyecto (ADR-008)**, no solo la landing |
 | Pagos | Conekta | MXN, SPEI, OXXO |
 | Facturación | Facturama API | CFDI automático |
 | Observabilidad | Sentry + logs estructurados | Debug producción |

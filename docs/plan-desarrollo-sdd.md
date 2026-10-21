@@ -78,7 +78,7 @@
 | Componente | Tecnología | Fase |
 |------------|-----------|------|
 | Landing web | Next.js 14 + TypeScript + Tailwind | Fase 0 |
-| Dashboard web | Next.js (mismo proyecto) | Fase 3 |
+| Dashboard web | Next.js — **mismo proyecto que la landing**, rutas autenticadas (ver ADR-008) | Fase 3 |
 | App móvil | React Native + Expo | Fase 3 |
 | UI components | shadcn/ui | Fase 0 |
 | Estado | Zustand | Fase 3 |
@@ -235,6 +235,51 @@ app/ai/prompts/
 - ⚠️ Más tokens por turno (se envía la lista de tools disponibles) — mitigado limitando qué tools se exponen según fase/estado del usuario
 - ⚠️ Requiere que `LLMProvider` y `AIRouter` soporten `tools`/`tool_calls` (ver extensión de US-006 y US-009 abajo)
 - ⚠️ Requiere más disciplina de testing: cada tool necesita tests de "qué pasa si el modelo la llama con argumentos raros o fuera de contexto"
+
+---
+
+### ADR-008: Dashboard web integrado al mismo proyecto Next.js del sitio de marketing
+
+**Contexto:** El objetivo de negocio es atacar la mayor cantidad de mercado posible. El canal
+conversacional (WhatsApp) ya cumple esto — no requiere instalar nada. Pero el dashboard (Mi
+Plan, Progreso, Alacena, Reportes) estaba planeado solo dentro de la app móvil nativa
+(React Native + Expo, Fase 3), lo que significa que un usuario que no quiera o no pueda
+instalar una app (espacio en el teléfono, desconfianza a instalar apps nuevas, quiere verlo
+rápido desde una computadora) se queda sin acceso al dashboard. La tabla de stack (sección
+1.4) ya contemplaba un "Dashboard web | Next.js (mismo proyecto)" en Fase 3, pero nunca se
+formalizó como decisión explícita ni se conectó con el sitio de marketing.
+
+**Decisión:** El dashboard se construye como rutas autenticadas **dentro del mismo proyecto
+Next.js** que aloja la landing page de marketing (`koach.mx`) — no como un proyecto de
+frontend separado y no como una dependencia exclusiva de la app nativa. Concretamente:
+
+1. Un mismo repo/proyecto Next.js sirve dos tipos de rutas: las públicas de marketing
+   (`/`, `/como-funciona`, `/precios`, etc. — indexables, SEO) y las privadas del dashboard
+   (`/app/*` o un subdominio `app.koach.mx` — detrás de autenticación, `noindex`).
+2. Autenticación compartida vía Supabase Auth — el mismo usuario que ve la landing puede
+   iniciar sesión y llegar directo al dashboard sin cambiar de dominio ni de marca.
+3. La app móvil nativa (React Native + Expo, Fase 3) **no desaparece** — sigue siendo el
+   canal con mejor experiencia para notificaciones push nativas, cámara para registro por
+   foto (Fase 2+) y uso offline parcial. El dashboard web es un canal adicional, no un
+   reemplazo.
+4. Se reutiliza el stack ya elegido (Next.js, Tailwind, shadcn/ui, Recharts, Zustand) — no
+   se agrega un tercer frontend ni una tecnología nueva.
+
+**Consecuencias:**
+- ✅ Máxima cobertura de mercado: WhatsApp (día 1, sin instalar nada) + dashboard web (sin
+  instalar nada, cualquier navegador) + app nativa (mejor experiencia, Fase 3) — tres formas
+  de llegar al mismo usuario, siempre creciente, nunca excluyente.
+- ✅ Un solo dominio de marca (`koach.mx`) conecta publicidad → prueba del producto → uso
+  real, sin fricción de "descarga la app para ver de qué se trata".
+- ✅ No hay retrabajo de frontend: el dashboard web y la futura versión de la app comparten
+  diseño de componentes y lógica de datos donde sea razonable (llamadas a la misma API).
+- ⚠️ Las rutas del dashboard deben marcarse `noindex`/`nofollow` y quedar completamente
+  detrás de autenticación — nunca indexables ni accesibles sin sesión, por los mismos
+  motivos de datos sensibles de salud que ya rigen el resto del sistema (RLS, LFPDPPP).
+- ⚠️ Sigue siendo Fase 3 en el orden de ejecución (`plan-desarrollo-secuencial.md`) — esto
+  no adelanta el dashboard, solo aclara que cuando llegue esa fase, se construye web-first
+  dentro del proyecto de marketing, y la app nativa se construye en paralelo o después,
+  no como prerrequisito del dashboard web.
 
 ---
 
@@ -593,14 +638,14 @@ koach/
 │       ├── integration/
 │       └── e2e/
 │
-├── frontend-web/                  # Next.js
-│   ├── app/
+├── frontend-web/                  # Next.js — landing de marketing (Fase 0)
+│   ├── app/                       #   + dashboard autenticado en app/app/* (Fase 3, ADR-008)
 │   ├── components/
 │   ├── lib/
 │   └── public/
 │
-└── mobile/                        # React Native (Fase 3)
-    └── ...
+└── mobile/                        # React Native + Expo (Fase 3) — canal adicional,
+    └── ...                        # no prerrequisito del dashboard web (ver ADR-008)
 ```
 
 ---

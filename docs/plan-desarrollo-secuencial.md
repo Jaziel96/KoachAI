@@ -201,7 +201,7 @@ Estas fases aún no tienen specs completas por US individual (solo se nombraron 
 | Fase | Contenido | Horas estimadas |
 |------|-----------|------------------|
 | **Fase 2** — Nutrición completa | Alacena, modelo conversacional (US-145 a 148), EP-10 re-alcanzado, lista de compras, modo "Comí Fuera", audio, biblioteca de ejercicios, aprendizaje de patrones, registro por foto (EP-32) | ≈ 90-100 |
-| **Fase 3** — App y Dashboard | Dashboard web, app móvil, reportes PDF, modo gym avanzado, notificaciones push | ≈ 80 |
+| **Fase 3** — App y Dashboard | **Dashboard web integrado al mismo proyecto Next.js de marketing (ADR-008 — máxima cobertura de mercado, sin instalar nada)**, app móvil (React Native + Expo, canal adicional), reportes PDF, modo gym avanzado, notificaciones push | ≈ 80 |
 | **Fase 4** — Chat nativo y monetización | Chat en app, pagos automatizados (Conekta real), CFDI, referidos, analytics | ≈ 80 |
 | **Fase 5** — Perfiles y escala | Sistema de perfiles especializados, post-parto, adulto mayor, diabetes, migración a IA local | ≈ 90+ |
 
