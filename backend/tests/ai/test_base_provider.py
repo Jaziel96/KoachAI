@@ -6,8 +6,6 @@ Cubre CA-1, CA-2, CA-4, CA-5. CA-3 (mypy strict) se valida vía
 
 from __future__ import annotations
 
-import sys
-
 import pytest
 
 from app.ai.exceptions import ToolsNotSupportedError
@@ -41,9 +39,9 @@ def test_ca1_base_provider_no_importa_sdks_de_proveedores() -> None:
         elif isinstance(nodo, ast.ImportFrom) and nodo.module:
             modulos_importados.add(nodo.module)
 
+    # El AST prueba CA-1 sin depender de `sys.modules`, que es estado global del
+    # proceso: otro test (p. ej. AnthropicProvider, US-007) puede importar el SDK.
     assert modulos_importados.isdisjoint(sdks_prohibidos)
-    assert "anthropic" not in sys.modules
-    assert "google.generativeai" not in sys.modules
 
 
 @pytest.mark.asyncio

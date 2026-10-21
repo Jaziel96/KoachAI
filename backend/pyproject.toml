@@ -21,6 +21,7 @@ dependencies = [
     "jinja2>=3.1,<4.0",
     "pyyaml>=6.0,<7.0",
     "sentry-sdk[fastapi]>=2.0,<3.0",
+    "anthropic>=1.8,<2.0",
 ]
 
 [project.optional-dependencies]
@@ -52,3 +53,6 @@ plugins = ["pydantic.mypy"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+markers = [
+    "integration: requiere credenciales reales de un proveedor; se omite si no hay key",
+]
