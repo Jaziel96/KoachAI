@@ -184,8 +184,7 @@ class TranscriptionProvider(ABC):
         self,
         audio_bytes: bytes,
         language: str = "es",
-    ) -> str:
-        ...
+    ) -> str: ...
 
 
 class VisionProvider(ABC):
@@ -196,5 +195,4 @@ class VisionProvider(ABC):
         self,
         image_bytes: bytes,
         prompt: str,
-    ) -> str:
-        ...
+    ) -> str: ...

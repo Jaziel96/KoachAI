@@ -7,8 +7,15 @@ hardcodear secretos ni URLs en el código — ver regla #3 de CLAUDE.md.
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import HttpUrl, PostgresDsn, RedisDsn, SecretStr
+from pydantic import BaseModel, HttpUrl, PostgresDsn, RedisDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class ModelPricing(BaseModel):
+    """Precio de un modelo en USD por millón de tokens."""
+
+    input_per_mtok: float
+    output_per_mtok: float
 
 
 class Settings(BaseSettings):
@@ -33,6 +40,15 @@ class Settings(BaseSettings):
     AI_FAST_PROVIDER: str = "gemini"
     ANTHROPIC_API_KEY: SecretStr | None = None
     GEMINI_API_KEY: SecretStr | None = None
+    ANTHROPIC_MODEL_FAST: str = "claude-haiku-4-5"
+    ANTHROPIC_MODEL_SMART: str = "claude-sonnet-5"
+    ANTHROPIC_MODEL_VISION: str = "claude-sonnet-5"
+    ANTHROPIC_TIMEOUT_SECONDS: float = 30.0
+    ANTHROPIC_MAX_RETRIES: int = 3
+    ANTHROPIC_RETRY_AFTER_CAP_SECONDS: float = 30.0
+    # Sin default a propósito: los precios cambian y deben confirmarse contra la
+    # página oficial. Formato JSON: {"<modelo>": {"input_per_mtok": X, "output_per_mtok": Y}}
+    ANTHROPIC_PRICING: dict[str, ModelPricing] = {}
 
     # WhatsApp
     WHATSAPP_TOKEN: SecretStr
