@@ -77,7 +77,7 @@
 
 | Componente | Tecnología | Fase |
 |------------|-----------|------|
-| Landing web | Next.js 14 + TypeScript + Tailwind | Fase 0 |
+| Landing web | Next.js 16 + TypeScript + Tailwind 4 | Fase 0 |
 | Dashboard web | Next.js — **mismo proyecto que la landing**, rutas autenticadas (ver ADR-008) | Fase 3 |
 | App móvil | React Native + Expo | Fase 3 |
 | UI components | shadcn/ui | Fase 0 |
@@ -1447,8 +1447,12 @@ prompt = prompt_loader.render(
 **Para que** pueda conocer el producto
 
 **Requisitos Funcionales:**
-- RF-1. Next.js 14 con App Router y TypeScript
-- RF-2. Tailwind con design tokens de Koach
+- RF-1. Next.js con App Router y TypeScript — **implementado con Next.js 16**
+  (actualizado desde "Next.js 14" de la versión original de esta spec; usar la
+  versión estable vigente al momento de implementar, no fijarse a un número)
+- RF-2. Tailwind con design tokens de Koach — **implementado con Tailwind 4**,
+  que define los tokens en el bloque `@theme` de `globals.css` en vez de
+  `tailwind.config.js` (ese archivo no existe en Tailwind 4)
 - RF-3. Deploy en Vercel conectado a GitHub
 - RF-4. Dominio koach.mx apuntando a Vercel
 
@@ -1464,8 +1468,14 @@ colors: {
 
 **Criterios de Aceptación:**
 - [ ] CA-1: koach.mx carga con HTTPS
-- [ ] CA-2: Lighthouse score > 90 en Performance
+- [ ] CA-2: Lighthouse score > 90 en Performance — ✅ cumplido en local (99)
+      sobre el build de producción; falta remedir sobre koach.mx una vez
+      desplegado
 - [ ] CA-3: Deploy automático en push
+
+**Estado:** el scaffold (RF-1, RF-2) está implementado en `frontend-web/`.
+RF-3, RF-4, CA-1 y CA-3 dependen del deploy en Vercel y el DNS, pendientes
+— ver `frontend-web/DEPLOY.md`.
 
 ---
 

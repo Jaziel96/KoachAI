@@ -19,6 +19,7 @@
 > | Router de IA "clasificar y rutear" (sección 11.2) | **Reemplazado por arquitectura agéntica con tool-use nativo (ADR-007)** | `docs/plan-desarrollo-sdd.md`, ADR-007 y EP-06 bis |
 > | Claude Sonnet 4.6 / modelos nombrados específicos | Los nombres de modelo cambian — usar la abstracción de `docs/plan-desarrollo-sdd.md` (`LLMProvider`), no hardcodear versiones | `docs/plan-desarrollo-sdd.md`, sección 3 |
 > | US-134 a US-144, ciclo de vida de cuentas, EP-31 | No estaban en este documento — se agregaron después | `docs/analisis-brechas.md`, `docs/ciclo-vida-usuario.md` |
+> | "Next.js 14" (secciones 12 y 13) | Implementado con **Next.js 16 + Tailwind 4** (US-011) — no fijarse a un número de versión, usar la estable vigente al implementar | `docs/plan-desarrollo-sdd.md`, spec de US-011 |
 >
 > **Lo que SÍ sigue vigente tal cual:** el esquema completo de base de datos
 > (sección 14), la visión y misión (sección 1), la arquitectura de dos
