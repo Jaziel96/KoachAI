@@ -71,7 +71,11 @@ export const FOUNDER_BENEFITS = [
   "Canal privado con los cofundadores",
 ] as const;
 
-export type FaqItem = { question: string; answer: string };
+export type FaqItem = {
+  question: string;
+  answer: string;
+  link?: { href: string; label: string };
+};
 
 export const FAQ: FaqItem[] = [
   {
@@ -112,7 +116,8 @@ export const FAQ: FaqItem[] = [
   {
     question: "¿Qué hacen con mis datos?",
     answer:
-      "Usamos tu información solo para acompañarte, conforme a nuestro Aviso de Privacidad. Puedes leerlo completo en la página de privacidad.",
+      "Usamos tu información solo para acompañarte, conforme a nuestro Aviso de Privacidad.",
+    link: { href: "/privacidad", label: "Leer el Aviso de Privacidad" },
   },
   {
     question: "¿Puedo cancelar cuando quiera?",

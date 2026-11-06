@@ -24,6 +24,14 @@ export function Faq() {
               </span>
             </summary>
             <p className="mt-3 text-dark/80">{item.answer}</p>
+            {item.link && (
+              <a
+                href={item.link.href}
+                className="mt-2 inline-block font-semibold text-primary underline underline-offset-4"
+              >
+                {item.link.label}
+              </a>
+            )}
           </details>
         ))}
       </div>

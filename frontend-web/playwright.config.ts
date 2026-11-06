@@ -7,6 +7,9 @@ import { defineConfig, devices } from "@playwright/test";
  * `next dev`: así se prueba lo mismo que termina en Vercel, no el modo
  * desarrollo (que tiene overlays y comportamiento distinto).
  */
+// E2E_PORT permite evitar un servidor viejo ocupando el 3000 (reuseExistingServer).
+const PORT = process.env.E2E_PORT ?? "3000";
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
@@ -14,7 +17,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: "list",
   use: {
-    baseURL: "http://127.0.0.1:3000",
+    baseURL: `http://127.0.0.1:${PORT}`,
     trace: "on-first-retry",
   },
   projects: [
@@ -26,8 +29,8 @@ export default defineConfig({
     { name: "mobile-safari", use: { ...devices["iPhone 14"] } },
   ],
   webServer: {
-    command: "npm run build && npm run start",
-    url: "http://127.0.0.1:3000",
+    command: `npm run build && npm run start -- -p ${PORT}`,
+    url: `http://127.0.0.1:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
