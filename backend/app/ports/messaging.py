@@ -14,6 +14,19 @@ from enum import StrEnum
 from typing import Literal
 
 
+class MessagingError(Exception):
+    """Error al enviar un mensaje. Los mensajes nunca incluyen el cuerpo de la
+    respuesta del canal, ni teléfonos, ni credenciales."""
+
+
+class MessagingTransientError(MessagingError):
+    """Falla temporal (red, indisponibilidad) o de resultado incierto."""
+
+
+class MessagingPermanentError(MessagingError):
+    """El canal rechazó el envío o la petición es inválida; reintentar no ayuda."""
+
+
 class MessageType(StrEnum):
     """Tipo de contenido de un mensaje entrante (RF-3)."""
 

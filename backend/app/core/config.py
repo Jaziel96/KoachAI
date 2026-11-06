@@ -55,6 +55,12 @@ class Settings(BaseSettings):
     WHATSAPP_PHONE_NUMBER_ID: str
     WHATSAPP_VERIFY_TOKEN: SecretStr
     WHATSAPP_APP_SECRET: SecretStr
+    # Sin default a propósito: la versión vigente de la Graph API debe confirmarse
+    # contra la documentación de Meta (ej. "v<NN>.0").
+    WHATSAPP_API_VERSION: str | None = None
+    WHATSAPP_BASE_URL: str = "https://graph.facebook.com"
+    WHATSAPP_TIMEOUT_SECONDS: float = 10.0
+    WHATSAPP_MAX_RETRIES: int = 3
 
     # HTTP
     CORS_ALLOWED_ORIGINS: list[str] = []
