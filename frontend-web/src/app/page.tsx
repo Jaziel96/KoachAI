@@ -1,13 +1,26 @@
+import { ChatMockups } from "@/components/landing/ChatMockups";
+import { Faq } from "@/components/landing/Faq";
+import { Footer } from "@/components/landing/Footer";
+import { Hero } from "@/components/landing/Hero";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { Pricing } from "@/components/landing/Pricing";
+import { Problem } from "@/components/landing/Problem";
+
 export default function Home() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-      <h1 className="text-5xl font-bold tracking-tight text-primary">Koach</h1>
-      <p className="max-w-md text-lg text-dark">
-        Tu coach de hábitos saludables por WhatsApp. Muy pronto.
-      </p>
-      <span className="rounded-full bg-accent px-4 py-1 text-sm font-medium text-dark">
-        En construcción
-      </span>
-    </main>
+    <>
+      <header className="px-4 py-4">
+        <p className="mx-auto max-w-5xl text-xl font-bold text-primary">Koach</p>
+      </header>
+      <main className="flex-1">
+        <Hero />
+        <Problem />
+        <HowItWorks />
+        <ChatMockups />
+        <Pricing />
+        <Faq />
+      </main>
+      <Footer />
+    </>
   );
 }

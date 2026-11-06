@@ -12,12 +12,25 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const TITLE = "Koach — tu coach de hábitos saludables por WhatsApp";
+const DESCRIPTION =
+  "Koach te acompaña por WhatsApp con orientación alimentaria y hábitos saludables.";
+
 export const metadata: Metadata = {
-  title: "Koach — tu coach de hábitos saludables por WhatsApp",
-  description:
-    "Koach te acompaña por WhatsApp con orientación alimentaria y hábitos saludables.",
+  title: TITLE,
+  description: DESCRIPTION,
   metadataBase: new URL("https://koach.mx"),
-  openGraph: { locale: "es_MX", type: "website", siteName: "Koach" },
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true },
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: "/",
+    locale: "es_MX",
+    type: "website",
+    siteName: "Koach",
+  },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
 };
 
 export const viewport: Viewport = {
