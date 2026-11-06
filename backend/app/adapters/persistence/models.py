@@ -26,7 +26,7 @@ from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Te
 from sqlalchemy import Enum as PgEnum
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, text
 
 TZ = DateTime(timezone=True)
 
@@ -189,7 +189,15 @@ class HistorialConversacion(Base):
     """
 
     __tablename__ = "historial_conversacion"
-    __table_args__ = (Index("idx_historial_user_fecha", "user_id", "fecha"),)
+    __table_args__ = (
+        Index("idx_historial_user_fecha", "user_id", "fecha"),
+        Index(
+            "uq_historial_message_id_externo",
+            "message_id_externo",
+            unique=True,
+            postgresql_where=text("message_id_externo IS NOT NULL"),
+        ),
+    )
 
     id: Mapped[uuid.UUID] = _uuid_pk()
     user_id: Mapped[uuid.UUID | None] = mapped_column(
@@ -214,6 +222,8 @@ class HistorialConversacion(Base):
     template_id: Mapped[str | None] = mapped_column(String(50))
     audio_url: Mapped[str | None] = mapped_column(String)
     audio_transcripcion: Mapped[str | None] = mapped_column(Text)
+    # Id del mensaje asignado por el canal (p. ej. `wamid.*` de Meta) — US-017 CA-3.
+    message_id_externo: Mapped[str | None] = mapped_column(String(100))
 
 
 # ============================================
