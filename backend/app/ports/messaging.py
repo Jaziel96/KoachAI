@@ -8,7 +8,7 @@ en `app/adapters/` y la lógica de negocio solo conoce esta interface.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import StrEnum
 from typing import Literal
@@ -24,7 +24,7 @@ class MessageType(StrEnum):
     DOCUMENT = "document"
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class Button:
     """Botón de respuesta rápida, común a WhatsApp y chat en app."""
 
@@ -32,17 +32,22 @@ class Button:
     title: str
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class IncomingMessage:
-    """Mensaje entrante normalizado, agnóstico de canal (RF-2)."""
+    """Mensaje entrante normalizado, agnóstico de canal (RF-2).
+
+    Inmutable: un mensaje ya revisado por el screening de crisis no puede
+    alterarse después. `from_id`, `text` y `media_url` quedan fuera del `repr`
+    para que logs y tracebacks no filtren datos personales.
+    """
 
     channel: Literal["whatsapp", "app"]
-    from_id: str  # teléfono o user_id
+    from_id: str = field(repr=False)  # teléfono o user_id
     message_id: str
     type: MessageType
     timestamp: datetime
-    text: str | None = None
-    media_url: str | None = None
+    text: str | None = field(default=None, repr=False)
+    media_url: str | None = field(default=None, repr=False)
     button_payload: str | None = None
 
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+from dataclasses import FrozenInstanceError
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -113,3 +114,36 @@ def test_ca2_nada_fuera_de_ports_y_adapters_depende_de_whatsapp() -> None:
         if any("whatsapp" in m.lower() for m in _imports(archivo)):
             ofensores.append(str(archivo.relative_to(APP_DIR)))
     assert ofensores == []
+
+
+def _mensaje() -> IncomingMessage:
+    return IncomingMessage(
+        channel="whatsapp",
+        from_id="5215512345678",
+        message_id="m1",
+        type=MessageType.TEXT,
+        timestamp=datetime.now(UTC),
+        text="me siento mal",
+        media_url="https://x.test/foto.jpg",
+    )
+
+
+def test_repr_de_incoming_message_no_filtra_pii() -> None:
+    """El repr (logs, tracebacks) no debe volcar teléfono, texto ni media_url."""
+    salida = repr(_mensaje())
+    assert "5215512345678" not in salida
+    assert "me siento mal" not in salida
+    assert "foto.jpg" not in salida
+
+
+def test_incoming_message_es_inmutable() -> None:
+    """Un mensaje ya revisado por el screening de crisis no puede alterarse."""
+    msg = _mensaje()
+    with pytest.raises(FrozenInstanceError):
+        msg.text = "otro texto"  # type: ignore[misc]
+
+
+def test_button_es_inmutable() -> None:
+    boton = Button(id="a", title="Opción A")
+    with pytest.raises(FrozenInstanceError):
+        boton.title = "otra"  # type: ignore[misc]
