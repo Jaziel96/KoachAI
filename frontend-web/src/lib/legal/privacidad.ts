@@ -31,6 +31,7 @@ export const privacidad: LegalDocument = {
         "Datos personales de perfil, como edad, estatura y peso.",
         "Datos sensibles de salud y hábitos, como tus metas, tu alimentación y tus respuestas a cuestionarios de salud.",
         "Los mensajes que intercambias con Koach.",
+        "Si te registras en la lista de espera: tu correo, tu nombre y tu meta principal.",
       ],
     },
     {
@@ -40,6 +41,7 @@ export const privacidad: LegalDocument = {
         "Darte orientación alimentaria y acompañamiento de hábitos.",
         "Personalizar las sugerencias con base en tu meta y tu alacena.",
         "Enviarte recordatorios y mensajes de seguimiento.",
+        "Avisarte cuando Koach esté disponible, si te registraste en la lista de espera.",
         "Mejorar la seguridad y el funcionamiento del servicio.",
       ],
     },

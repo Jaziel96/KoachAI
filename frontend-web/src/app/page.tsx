@@ -3,6 +3,7 @@ import { Faq } from "@/components/landing/Faq";
 import { Footer } from "@/components/landing/Footer";
 import { Hero } from "@/components/landing/Hero";
 import { HowItWorks } from "@/components/landing/HowItWorks";
+import { Leads } from "@/components/landing/Leads";
 import { Pricing } from "@/components/landing/Pricing";
 import { Problem } from "@/components/landing/Problem";
 
@@ -18,6 +19,7 @@ export default function Home() {
         <HowItWorks />
         <ChatMockups />
         <Pricing />
+        <Leads />
         <Faq />
       </main>
       <Footer />

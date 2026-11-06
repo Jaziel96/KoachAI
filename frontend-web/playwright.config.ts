@@ -9,6 +9,7 @@ import { defineConfig, devices } from "@playwright/test";
  */
 // E2E_PORT permite evitar un servidor viejo ocupando el 3000 (reuseExistingServer).
 const PORT = process.env.E2E_PORT ?? "3000";
+const MOCK_PORT = process.env.E2E_MOCK_PORT ?? "3101";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -28,10 +29,23 @@ export default defineConfig({
     { name: "mobile-chrome", use: { ...devices["Pixel 7"] } },
     { name: "mobile-safari", use: { ...devices["iPhone 14"] } },
   ],
-  webServer: {
-    command: `npm run build && npm run start -- -p ${PORT}`,
-    url: `http://127.0.0.1:${PORT}`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer: [
+    {
+      // Supabase falso para US-013 (nunca se usa una base real en los E2E).
+      command: "node e2e/mock-supabase.mjs",
+      url: `http://127.0.0.1:${MOCK_PORT}`,
+      env: { E2E_MOCK_PORT: MOCK_PORT },
+      reuseExistingServer: !process.env.CI,
+    },
+    {
+      command: `npm run build && npm run start -- -p ${PORT}`,
+      url: `http://127.0.0.1:${PORT}`,
+      env: {
+        SUPABASE_URL: `http://127.0.0.1:${MOCK_PORT}`,
+        SUPABASE_SERVICE_KEY: "test-service-key",
+      },
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+  ],
 });
