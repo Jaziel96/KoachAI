@@ -54,6 +54,7 @@ class Settings(BaseSettings):
     WHATSAPP_TOKEN: SecretStr
     WHATSAPP_PHONE_NUMBER_ID: str
     WHATSAPP_VERIFY_TOKEN: SecretStr
+    WHATSAPP_APP_SECRET: SecretStr
 
     # HTTP
     CORS_ALLOWED_ORIGINS: list[str] = []

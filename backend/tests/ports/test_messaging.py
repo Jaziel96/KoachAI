@@ -20,6 +20,9 @@ from tests.ports.mock_channel import MockMessagingChannel
 APP_DIR = Path(__file__).resolve().parents[2] / "app"
 # Únicos lugares donde puede vivir código específico de WhatsApp (CA-2).
 PERMITIDOS = ("ports", "adapters")
+# Borde HTTP del canal (adaptador de entrada, sin lógica de negocio) y la raíz de
+# composición que lo conecta. Cualquier otro módulo con imports de WhatsApp falla.
+PERMITIDOS_RUTAS = {"api/webhooks/whatsapp.py", "main.py"}
 
 
 def _imports(source: Path) -> set[str]:
@@ -109,7 +112,8 @@ def test_ca2_nada_fuera_de_ports_y_adapters_depende_de_whatsapp() -> None:
     """Listo para cuando exista lógica de negocio (services/, domain/, ai/...)."""
     ofensores: list[str] = []
     for archivo in APP_DIR.rglob("*.py"):
-        if archivo.relative_to(APP_DIR).parts[0] in PERMITIDOS:
+        relativo = archivo.relative_to(APP_DIR)
+        if relativo.parts[0] in PERMITIDOS or relativo.as_posix() in PERMITIDOS_RUTAS:
             continue
         if any("whatsapp" in m.lower() for m in _imports(archivo)):
             ofensores.append(str(archivo.relative_to(APP_DIR)))

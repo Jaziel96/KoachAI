@@ -8,6 +8,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.health import router as health_router
+from app.api.webhooks.whatsapp import router as whatsapp_webhook_router
 from app.core.config import get_settings
 from app.core.exceptions import unhandled_exception_handler
 from app.core.logging import configure_logging, get_logger
@@ -45,3 +46,4 @@ async def request_context_middleware(
 
 app.add_exception_handler(Exception, unhandled_exception_handler)
 app.include_router(health_router)
+app.include_router(whatsapp_webhook_router)
